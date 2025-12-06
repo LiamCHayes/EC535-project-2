@@ -116,6 +116,7 @@ static int __init meteor_init(void)
     // Make memory for drawing rectangles
     blank = kmalloc(sizeof(struct fb_fillrect), GFP_KERNEL);
     if (!blank) {
+        printk(KERN_ALERT "could not allocate space for blank\n");
         pr_err("Failed to allocate new blank pointer");
     }
 
