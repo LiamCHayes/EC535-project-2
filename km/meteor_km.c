@@ -113,11 +113,14 @@ static void meteor_handler(struct timer_list *data) {
 // Device file functions
 static int __init meteor_init(void)
 {
+    printk(KERN_ALERT "beginning of init\n");
+
     // Make memory for drawing rectangles
     blank = kmalloc(sizeof(struct fb_fillrect), GFP_KERNEL);
     if (!blank) {
         printk(KERN_ALERT "could not allocate space for blank\n");
         pr_err("Failed to allocate new blank pointer");
+        return -ENOMEM;
     }
 
     // Start the meteor timer
@@ -126,6 +129,7 @@ static int __init meteor_init(void)
     {
         printk(KERN_ALERT "Insufficient kernel memory\n");
         pr_err("Failed to allocate new timer pointer");
+        return -ENOMEM;
     }
     timer_setup(timer, meteor_handler, 0);
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
@@ -135,6 +139,7 @@ static int __init meteor_init(void)
     printk(KERN_ALERT "drawing new meteor\n");
     if (!new_position) {
         pr_err("Failed to allocate new meteor pointer");
+        return -ENOMEM;
     }
     new_position->dx = 200;
     new_position->dy = 0;
