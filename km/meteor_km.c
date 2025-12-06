@@ -20,6 +20,23 @@ MODULE_DESCRIPTION("Meteor game");
 #define CYG_FB_DEFAULT_PALETTE_LIGHTBLUE    0x09
 #define CYG_FB_DEFAULT_PALETTE_BLACK        0x00
 
+// Device file definitions
+static int meteor_open(struct inode *inode, struct file *filp);
+static int meteor_release(struct inode *inode, struct file *filp);
+static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos);
+static ssize_t meteor_read(struct file *filp, char *buf, size_t count, loff_t *f_pos);
+
+struct file_operations meteor_fops = {
+write:
+    meteor_write,
+read:
+    meteor_read,
+open:
+    meteor_open,
+release:
+    meteor_release,
+};
+
 // Global variables for meteors and character
 struct fb_info *info;
 struct fb_fillrect *blank;
@@ -62,6 +79,18 @@ static void __exit meteor_exit(void) {
     kfree(blank);
 
     printk(KERN_INFO "Module exiting\n");
+}
+
+static int meteor_open(struct inode *inode, struct file *filp) {
+}
+
+static int meteor_release(struct inode *inode, struct file *filp) {
+}
+
+static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
+}
+
+static ssize_t meteor_read(struct file *filp, char *buf, size_t count, loff_t *f_pos) {
 }
 
 module_init(meteor_init);
