@@ -25,7 +25,7 @@ MODULE_DESCRIPTION("Meteor game");
 static int meteor_open(struct inode *inode, struct file *filp);
 static int meteor_release(struct inode *inode, struct file *filp);
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos);
-static ssize_t meteor_read(struct file *filp, char *buf, size_t count, loff_t *f_pos);
+static void meteor_handler(struct timer_list*);
 
 struct file_operations meteor_fops = {
 write:
@@ -41,7 +41,19 @@ release:
 // Global variables for meteors and character
 struct fb_info *info;
 struct fb_fillrect *blank;
-const struct font_desc *current_font;
+
+typedef struct meteor_position {
+    int dx;
+    int dy;
+    int width;
+    int height;
+} meteor_position_t;
+
+static struct timer_list * timer;
+static int meteor_update_rate_ms = 10;
+static meteor_position_t *meteors[32];
+static int n_meteors = 0;
+static int meteor_falling_rate = 5;
 
 // Helper functions
 /* Helper function borrowed from drivers/video/fbdev/core/fbmem.c */
@@ -59,23 +71,77 @@ static struct fb_info *get_fb_info(unsigned int idx)
     return fb_info;
 }
 
-// Device file functions
-static int __init meteor_init(void)
-{
-    // Draw a rectagle
-    blank = kmalloc(sizeof(struct fb_fillrect), GFP_KERNEL);
-    blank->dx = 500;
-    blank->dy = 0;
-    blank->width = 40;
-    blank->height = 100;
-    blank->color = CYG_FB_DEFAULT_PALETTE_RED;
+static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new_position) {
+    // Draw rectangle at the old position in black
+    blank->dx = old_position->dx;
+    blank->dy = old_position->dy;
+    blank->width = old_position->width;
+    blank->height = old_position->height;
+    blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
     blank->rop = ROP_COPY;
     info = get_fb_info(0);
     lock_fb_info(info);
     sys_fillrect(info, blank);
     unlock_fb_info(info);
 
+    // Draw rectangle at new position in red
+    blank->dx = new_position->dx;
+    blank->dy = new_position->dy;
+    blank->width = new_position->width;
+    blank->height = new_position->height;
+    blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
+    blank->rop = ROP_COPY;
+    info = get_fb_info(0);
+    lock_fb_info(info);
+    sys_fillrect(info, blank);
+    unlock_fb_info(info);
+}
+
+// meteor timer handler
+static void meteor_handler(struct timer_list *data) {
+    // Move all meteors down a few pixels
+    int i;
+    for (i=0; i<n_meteors; i++) {
+        meteor_position_t *new_meteor_position = meteors[i];
+        new_meteor_position->dy = meteors[i] + meteor_falling_rate;
+        redraw_meteor(meteors[i], new_meteor_position)
+    }
+
+    // Restart timer
+    mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
+}
+
+// Device file functions
+static int __init meteor_init(void)
+{
+    // Make memory for drawing rectangles
+    blank = kmalloc(sizeof(struct fb_fillrect), GFP_KERNEL);
     return 0;
+
+    // Start the meteor timer
+    timer_setup(timer, meteor_handler, 0);
+    mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
+
+    // TEST Draw a meteor and have it fall
+    meteor_position_t new_position;
+    new_position.dx = 200;
+    new_position.dy = 0;
+    new_position.width = 40;
+    new_position.height = 40;
+
+    blank->dx = new_position.dx;
+    blank->dy = new_position.dy;
+    blank->width = new_position.width;
+    blank->height = new_position.height;
+    blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
+    blank->rop = ROP_COPY;
+    info = get_fb_info(0);
+    lock_fb_info(info);
+    sys_fillrect(info, blank);
+    unlock_fb_info(info);
+
+    meteors[n_meteors] = *new_position;
+    n_meteors ++;
 }
 
 static void __exit meteor_exit(void) {
@@ -90,15 +156,12 @@ static void __exit meteor_exit(void) {
 static int meteor_open(struct inode *inode, struct file *filp) {
 }
 
+static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
+
+}
+
 static int meteor_release(struct inode *inode, struct file *filp) {
 }
-
-static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
-}
-
-static ssize_t meteor_read(struct file *filp, char *buf, size_t count, loff_t *f_pos) {
-}
-
 module_init(meteor_init);
 module_exit(meteor_exit);
 
