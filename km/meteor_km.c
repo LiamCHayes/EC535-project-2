@@ -122,7 +122,7 @@ static int __init meteor_init(void)
 
     // Start the meteor timer
     timer_setup(timer, meteor_handler, 0);
-    mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
+    // mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
 
     // TEST Draw a meteor and have it fall
     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
