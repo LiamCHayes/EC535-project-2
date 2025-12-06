@@ -895,6 +895,7 @@ deps_/ad/eng/users/l/i/liamh/EC535/EC535-project-2/km/meteor_km.o := \
   arch/arm/include/generated/asm/extable.h \
   include/asm-generic/extable.h \
   include/linux/ctype.h \
+  include/linux/font.h \
 
 /ad/eng/users/l/i/liamh/EC535/EC535-project-2/km/meteor_km.o: $(deps_/ad/eng/users/l/i/liamh/EC535/EC535-project-2/km/meteor_km.o)
 
