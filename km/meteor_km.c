@@ -114,9 +114,7 @@ static int __init meteor_init(void)
     blank->color = CYG_FB_DEFAULT_PALETTE_RED;
     blank->rop = ROP_COPY;
     info = get_fb_info(0);
-    lock_fb_info(info);
     sys_fillrect(info, blank);
-    unlock_fb_info(info);
 
     // Write some words to the screen using the new function
     draw_text(info, 10, 10, "READY TO START THE METOR GAME????", CYG_FB_DEFAULT_PALETTE_WHITE);
