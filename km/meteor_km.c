@@ -115,6 +115,9 @@ static int __init meteor_init(void)
 {
     // Make memory for drawing rectangles
     blank = kmalloc(sizeof(struct fb_fillrect), GFP_KERNEL);
+    if (!blank) {
+        pr_err("Failed to allocate new blank pointer");
+    }
 
     // Start the meteor timer
     timer_setup(timer, meteor_handler, 0);
