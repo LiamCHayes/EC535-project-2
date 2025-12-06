@@ -114,7 +114,6 @@ static int __init meteor_init(void)
 {
     // Make memory for drawing rectangles
     blank = kmalloc(sizeof(struct fb_fillrect), GFP_KERNEL);
-    return 0;
 
     // Start the meteor timer
     timer_setup(timer, meteor_handler, 0);
@@ -148,6 +147,8 @@ static int __init meteor_init(void)
         pr_warn("Meteor array full, freeing allocated instance");
         kfree(new_position);
     }
+
+    return 0;
 }
 
 static void __exit meteor_exit(void) {
