@@ -26,6 +26,7 @@ static const struct modversion_info ____versions[]
 __used
 __attribute__((section("__versions"))) = {
 	{ 0xa16cf51b, "module_layout" },
+	{ 0x1af2db6e, "registered_fb" },
 	{ 0xc6f46339, "init_timer_key" },
 	{ 0x37a0cba, "kfree" },
 	{ 0x7c32d0f0, "printk" },
@@ -36,7 +37,6 @@ __attribute__((section("__versions"))) = {
 	{ 0x6fb021c9, "lock_fb_info" },
 	{ 0xcf8d2e6f, "kmem_cache_alloc_trace" },
 	{ 0xb44e414c, "kmalloc_caches" },
-	{ 0x1af2db6e, "registered_fb" },
 	{ 0x2e5810c6, "__aeabi_unwind_cpp_pr1" },
 	{ 0xb1ad28e0, "__gnu_mcount_nc" },
 };
