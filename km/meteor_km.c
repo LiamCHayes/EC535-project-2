@@ -98,19 +98,19 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
 // meteor timer handler
 static void meteor_handler(struct timer_list *data) {
     // Move all meteors down a few pixels
+    meteor_position_t *new_meteor_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
+    if (!new_meteor_position) {
+        pr_err("Failed to allocate new meteor pointer");
+        return -ENOMEM;
+    }
+
     int i;
     for (i=0; i<n_meteors; i++) {
-        meteor_position_t *new_meteor_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
-        if (!new_meteor_position) {
-            pr_err("Failed to allocate new meteor pointer");
-            return -ENOMEM;
-        }
         new_meteor_position = meteors[i];
 
         new_meteor_position->dy = meteors[i] + meteor_falling_rate;
         redraw_meteor(meteors[i], new_meteor_position);
     }
-    kfree(new_meteor_position);
 
     // Restart timer
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
