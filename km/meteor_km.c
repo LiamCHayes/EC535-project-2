@@ -88,37 +88,17 @@ void draw_text(struct fb_info *info, int x, int y, const char *text, u32 color) 
 // Device file functions
 static int __init meteor_init(void)
 {
-    // Get framebuffer info and lock
-    info = get_fb_info(0);
-    if (IS_ERR(info)) {
-        printk(KERN_ERR "meteor_init: Failed to get fb_info\n");
-        return PTR_ERR(info);
-    }
-    lock_fb_info(info);
-
-    // get system default font to write text to screen
-    current_font = get_default_font(0, 0, ~0, ~0); 
-    if (!current_font) {
-        printk(KERN_ERR "meteor_init: Failed to get default font\n");
-        unlock_fb_info(info);
-        atomic_dec(&info->count);
-        return -ENODEV;
-    }
-
     // Draw a rectagle
     blank = kmalloc(sizeof(struct fb_fillrect), GFP_KERNEL);
-    blank->dx = 400;
+    blank->dx = 500;
     blank->dy = 0;
     blank->width = 40;
     blank->height = 100;
     blank->color = CYG_FB_DEFAULT_PALETTE_RED;
     blank->rop = ROP_COPY;
     info = get_fb_info(0);
+    lock_fb_info(info);
     sys_fillrect(info, blank);
-
-    // Write some words to the screen using the new function
-    draw_text(info, 10, 10, "READY TO START THE METOR GAME????", CYG_FB_DEFAULT_PALETTE_WHITE);
-
     unlock_fb_info(info);
 
     return 0;
