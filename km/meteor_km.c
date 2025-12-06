@@ -110,6 +110,7 @@ static void meteor_handler(struct timer_list *data) {
         new_meteor_position->dy = meteors[i] + meteor_falling_rate;
         redraw_meteor(meteors[i], new_meteor_position);
     }
+    kfree(new_meteor_position);
 
     // Restart timer
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
