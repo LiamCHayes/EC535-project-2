@@ -26,12 +26,13 @@ static const struct modversion_info ____versions[]
 __used
 __attribute__((section("__versions"))) = {
 	{ 0xa16cf51b, "module_layout" },
+	{ 0x97934ecf, "del_timer_sync" },
 	{ 0x1af2db6e, "registered_fb" },
 	{ 0xc6f46339, "init_timer_key" },
-	{ 0x37a0cba, "kfree" },
-	{ 0x7c32d0f0, "printk" },
 	{ 0xc38c83b8, "mod_timer" },
 	{ 0x526c3a6c, "jiffies" },
+	{ 0x7c32d0f0, "printk" },
+	{ 0x37a0cba, "kfree" },
 	{ 0xd09cfa79, "_mutex_unlock" },
 	{ 0x336aa937, "sys_fillrect" },
 	{ 0x6fb021c9, "lock_fb_info" },
