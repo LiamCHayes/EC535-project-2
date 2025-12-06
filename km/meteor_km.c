@@ -20,27 +20,8 @@ MODULE_DESCRIPTION("Meteor game");
 #define CYG_FB_DEFAULT_PALETTE_LIGHTBLUE    0x09
 #define CYG_FB_DEFAULT_PALETTE_BLACK        0x00
 
-// Declare device file functions
-static int meteor_open(struct inode *inode, struct file *filp);
-static int meteor_release(struct inode *inode, struct file *filp);
-static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos);
-static int meteor_init(void);
-static void meteor_exit(void);
-static void meteor_timer_handler(struct timer_list*);
-
-struct file_operations meteor_fops = {
-    write:
-        meteor_write,
-    open:
-        meteor_open,
-    release:
-        meteor_release,
-};
-
 module_init(meteor_init);
 module_exit(meteor_exit);
-
-static int meteor_major = 61; 
 
 // Global variables for meteors and character
 struct fb_info *info;
