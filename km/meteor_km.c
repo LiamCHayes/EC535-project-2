@@ -122,13 +122,13 @@ static int __init meteor_init(void)
 
     // TEST Draw a meteor and have it fall
     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
-    if (!new_meteor_ptr) {
+    if (!new_position) {
         pr_err("Failed to allocate new meteor pointer");
     }
     new_position->dx = 200;
-    new_position->.dy = 0;
-    new_position->.width = 40;
-    new_position->.height = 40;
+    new_position->dy = 0;
+    new_position->width = 40;
+    new_position->height = 40;
 
     blank->dx = new_position->dx;
     blank->dy = new_position->dy;
