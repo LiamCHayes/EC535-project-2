@@ -146,7 +146,7 @@ static int __init meteor_init(void)
         n_meteors ++;
     } else {
         pr_warn("Meteor array full, freeing allocated instance");
-        kfree(new_meteor_ptr);
+        kfree(new_position);
     }
 }
 
