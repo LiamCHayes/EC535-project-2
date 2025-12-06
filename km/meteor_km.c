@@ -20,9 +20,6 @@ MODULE_DESCRIPTION("Meteor game");
 #define CYG_FB_DEFAULT_PALETTE_LIGHTBLUE    0x09
 #define CYG_FB_DEFAULT_PALETTE_BLACK        0x00
 
-module_init(meteor_init);
-module_exit(meteor_exit);
-
 // Global variables for meteors and character
 struct fb_info *info;
 struct fb_fillrect *blank;
@@ -66,3 +63,7 @@ static void __exit meteor_exit(void) {
 
     printk(KERN_INFO "Module exiting\n");
 }
+
+module_init(meteor_init);
+module_exit(meteor_exit);
+
