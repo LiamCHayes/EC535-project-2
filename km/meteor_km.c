@@ -50,7 +50,7 @@ typedef struct meteor_position {
 static struct timer_list * timer;
 static int meteor_update_rate_ms = 10;
 static meteor_position_t *meteors[32];
-static struct meteor_position_t * new_meteor_position;
+static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
 static int meteor_falling_rate = 5;
 
