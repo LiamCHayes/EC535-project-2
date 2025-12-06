@@ -112,7 +112,7 @@ static void meteor_handler(struct timer_list *data) {
         // Update meteor position in list
         meteors[i]->dy = meteors[i]->dy + meteor_falling_rate;
     }
-    kfree(new_meteor_position)
+    kfree(new_meteor_position);
 
     // Restart timer
     printk(KERN_ALERT "timer up");
