@@ -134,7 +134,7 @@ static int __init meteor_init(void)
     blank->dy = new_position->dy;
     blank->width = new_position->width;
     blank->height = new_position->height;
-    blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
+    blank->color = CYG_FB_DEFAULT_PALETTE_RED;
     blank->rop = ROP_COPY;
     info = get_fb_info(0);
     lock_fb_info(info);
