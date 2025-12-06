@@ -61,7 +61,7 @@ static int __init meteor_init(void)
 {
     // Draw a rectagle
     blank = kmalloc(sizeof(struct fb_fillrect), GFP_KERNEL);
-    blank->dx = 0;
+    blank->dx = 200;
     blank->dy = 0;
     blank->width = 40;
     blank->height = 100;
