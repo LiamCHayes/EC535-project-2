@@ -77,7 +77,6 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
     blank->height = old_position->height;
     blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
     blank->rop = ROP_COPY;
-    info = get_fb_info(0);
     lock_fb_info(info);
     sys_fillrect(info, blank);
     unlock_fb_info(info);
@@ -89,7 +88,6 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
     blank->height = new_position->height;
     blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
     blank->rop = ROP_COPY;
-    info = get_fb_info(0);
     lock_fb_info(info);
     sys_fillrect(info, blank);
     unlock_fb_info(info);
