@@ -30,8 +30,6 @@ static void meteor_handler(struct timer_list*);
 struct file_operations meteor_fops = {
 write:
     meteor_write,
-read:
-    meteor_read,
 open:
     meteor_open,
 release:
@@ -104,7 +102,7 @@ static void meteor_handler(struct timer_list *data) {
     for (i=0; i<n_meteors; i++) {
         meteor_position_t *new_meteor_position = meteors[i];
         new_meteor_position->dy = meteors[i] + meteor_falling_rate;
-        redraw_meteor(meteors[i], new_meteor_position)
+        redraw_meteor(meteors[i], new_meteor_position);
     }
 
     // Restart timer
@@ -140,8 +138,18 @@ static int __init meteor_init(void)
     sys_fillrect(info, blank);
     unlock_fb_info(info);
 
-    meteors[n_meteors] = *new_position;
-    n_meteors ++;
+    meteor_position_t *new_meteor_ptr = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
+    if (!new_meteor_ptr) {
+        pr_err("Failed to allocate new meteor pointer");
+    }
+    new_meteor_ptr = new_position;
+    if (n_meteors < 32) {
+        meteors[n_meteors] = new_meteor_ptr;
+        n_meteors ++;
+    } else {
+        pr_warn("Meteor array full, freeing allocated instance");
+        kfree(new_meteor_ptr);
+    }
 }
 
 static void __exit meteor_exit(void) {
