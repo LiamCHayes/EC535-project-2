@@ -129,6 +129,7 @@ static int __init meteor_init(void)
     {
         printk(KERN_ALERT "Insufficient kernel memory\n");
         pr_err("Failed to allocate new timer pointer");
+        kfree(blank);
         return -ENOMEM;
     }
     timer_setup(timer, meteor_handler, 0);
@@ -139,6 +140,8 @@ static int __init meteor_init(void)
     printk(KERN_ALERT "drawing new meteor\n");
     if (!new_position) {
         pr_err("Failed to allocate new meteor pointer");
+        kfree(blank);
+        kfree(timer);
         return -ENOMEM;
     }
     new_position->dx = 200;
