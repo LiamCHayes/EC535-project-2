@@ -121,16 +121,19 @@ static int __init meteor_init(void)
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
 
     // TEST Draw a meteor and have it fall
-    meteor_position_t new_position;
-    new_position.dx = 200;
-    new_position.dy = 0;
-    new_position.width = 40;
-    new_position.height = 40;
+    meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
+    if (!new_meteor_ptr) {
+        pr_err("Failed to allocate new meteor pointer");
+    }
+    new_position->dx = 200;
+    new_position->.dy = 0;
+    new_position->.width = 40;
+    new_position->.height = 40;
 
-    blank->dx = new_position.dx;
-    blank->dy = new_position.dy;
-    blank->width = new_position.width;
-    blank->height = new_position.height;
+    blank->dx = new_position->dx;
+    blank->dy = new_position->dy;
+    blank->width = new_position->width;
+    blank->height = new_position->height;
     blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
     blank->rop = ROP_COPY;
     info = get_fb_info(0);
@@ -138,13 +141,8 @@ static int __init meteor_init(void)
     sys_fillrect(info, blank);
     unlock_fb_info(info);
 
-    meteor_position_t *new_meteor_ptr = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
-    if (!new_meteor_ptr) {
-        pr_err("Failed to allocate new meteor pointer");
-    }
-    new_meteor_ptr = new_position;
     if (n_meteors < 32) {
-        meteors[n_meteors] = new_meteor_ptr;
+        meteors[n_meteors] = new_position;
         n_meteors ++;
     } else {
         pr_warn("Meteor array full, freeing allocated instance");
