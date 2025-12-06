@@ -104,13 +104,18 @@ static void meteor_handler(struct timer_list *data) {
 
     int i;
     for (i=0; i<n_meteors; i++) {
+        // Redraw meteor
         new_meteor_position = meteors[i];
-
-        new_meteor_position->dy = meteors[i] + meteor_falling_rate;
+        new_meteor_position->dy = meteors[i]->dy + meteor_falling_rate;
         redraw_meteor(meteors[i], new_meteor_position);
+
+        // Update meteor position in list
+        meteors[i]->dy = meteors[i]->dy + meteor_falling_rate;
     }
+    kfree(new_meteor_position)
 
     // Restart timer
+    printk(KERN_ALERT "timer up");
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
 }
 
@@ -168,16 +173,16 @@ static int __init meteor_init(void)
         printk(KERN_ALERT "Adding new meteor to list\n");
         meteors[n_meteors] = new_position;
         n_meteors ++;
-    } else {
-        pr_warn("Meteor array full, freeing allocated instance");
-        kfree(new_position);
     }
+    kfree(new_position);
 
     return 0;
 }
 
 static void __exit meteor_exit(void) {
+    del_timer_sync(timer);
     kfree(blank);
+    kfree(timer);
     if (info) {
         atomic_dec(&info->count);
     }
