@@ -80,7 +80,7 @@ static int __init meteor_init(void)
     return 0;
 }
 
-static void __exit hellofb_exit(void) {
+static void __exit meteor_exit(void) {
     kfree(blank);
 
     printk(KERN_INFO "Module exiting\n");
