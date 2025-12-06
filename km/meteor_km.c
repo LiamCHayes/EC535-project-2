@@ -10,6 +10,7 @@
 #include <linux/jiffies.h> // for jiffies global variable
 #include <linux/string.h> // for string manipulation functions
 #include <linux/ctype.h> // for isdigit
+#include <linux/font.h> // for default font
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Meteor game");
@@ -70,7 +71,7 @@ void draw_text(struct fb_info *info, int x, int y, const char *text, u32 color) 
     image.fg_color = color;
     image.bg_color = CYG_FB_DEFAULT_PALETTE_BLACK; // Background color index
     image.depth = info->var.bits_per_pixel;
-    image.cmap.length = 0; // Not using a custom colormap for the image
+    image.cmap.len = 0; // Not using a custom colormap for the image
 
     for (i = 0; text[i] != '\0'; i++) {
         unsigned char c = text[i];
@@ -128,7 +129,7 @@ static int __init meteor_init(void)
 static void __exit meteor_exit(void) {
     kfree(blank);
     if (info) {
-        atomiv_dec(&info->count);
+        atomic_dec(&info->count);
     }
 
     printk(KERN_INFO "Module exiting\n");
