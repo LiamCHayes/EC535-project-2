@@ -59,32 +59,6 @@ static struct fb_info *get_fb_info(unsigned int idx)
     return fb_info;
 }
 
-void draw_text(struct fb_info *info, int x, int y, const char *text, u32 color) {
-    struct fb_image image;
-    int i;
-
-    if (!current_font || !info)
-        return;
-
-    image.width = current_font->width;
-    image.height = current_font->height;
-    image.fg_color = color;
-    image.bg_color = CYG_FB_DEFAULT_PALETTE_BLACK; // Background color index
-    image.depth = info->var.bits_per_pixel;
-    image.cmap.len = 0; // Not using a custom colormap for the image
-
-    for (i = 0; text[i] != '\0'; i++) {
-        unsigned char c = text[i];
-        // The font data is a monochrome bitmap
-        image.data = current_font->data + (c * current_font->height * ((current_font->width + 7) / 8));
-        image.dx = x + i * current_font->width;
-        image.dy = y;
-
-        // Use the system's image blit function to draw the character
-        sys_imageblit(info, &image);
-    }
-}
-
 // Device file functions
 static int __init meteor_init(void)
 {
