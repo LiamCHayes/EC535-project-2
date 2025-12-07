@@ -364,8 +364,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     sys_fillrect(info, blank);
                     unlock_fb_info(info);
 
-                    meteors[n_meteors] = new_position;
-                    n_meteors ++;
                     mutex_unlock(&meteor_mutex);
                     return -1;
                 }
