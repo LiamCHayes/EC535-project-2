@@ -147,7 +147,7 @@ static void meteor_handler(struct timer_list *data) {
         meteors_y[i] = meteors[i]->dy + meteor_falling_rate;
 
         // Delete meteor if it went past the screen
-        if (meteors[i]->dy > 280) {
+        if (meteors[i]->dy > 150) {
             kfree(meteors[i]);
             int j;
             for (j=i; j<n_meteors-1; j++) {
