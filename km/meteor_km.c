@@ -11,6 +11,7 @@
 #include <linux/string.h> // for string manipulation functions
 #include <linux/ctype.h> // for isdigit
 #include <linux/font.h> // for default font
+#include <string.h>
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Meteor game");
@@ -251,17 +252,24 @@ static ssize_t meteor_read(struct file *filp, char *buf, size_t count, loff_t *f
 
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
     printk(KERN_ALERT "Start of write function!\n");
-    char buffer[32];
+    char buffer[8];
     int ret;
     ret = copy_from_user(&buffer, buf, count);
     if (ret != 0) {
         pr_err("failed to copy bytes from userspace\n");
         return -EFAULT;
     }
-    int i;
-    for (i=0; i<count; i++) {
-        printk(KERN_ALERT "%c\n", buffer[i]);
-    }
+
+    char *temp_str;
+    char *character_location;
+    char *spawn_location;
+    const char *delimiter = ",";
+    temp_str = buffer;
+    character_location = strsep(&temp_str, delimiter);
+    spawn_location = strsep(&temp_str, delimiter);
+
+    printk(KERN_ALERT "Character location %s\n", character_location);
+    printk(KERN_ALERT "Spawn location %s\n", spawn_location);
 
     // Add a new meteor
     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
