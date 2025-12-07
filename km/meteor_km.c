@@ -147,7 +147,7 @@ static void meteor_handler(struct timer_list *data) {
         meteors_y[i] = meteors[i]->dy + meteor_falling_rate;
 
         // Delete meteor if it went past the screen
-        if (meteors[i]->dy > 250) {
+        if (meteors[i]->dy > 280) {
             printk(KERN_ALERT "Deleting meteor %d\n", i);
             kfree(meteors[i]);
             int j;
@@ -156,8 +156,8 @@ static void meteor_handler(struct timer_list *data) {
                 meteors_x[j] = meteors_x[j+1];
                 meteors_y[j] = meteors_y[j+1];
             }
-            kfree(meteors[n_meteors]);
             n_meteors--;
+            printk(KERN_ALERT "Number of meteors after deleting %d\n", i);
         } else {
             i++;
         }
@@ -355,6 +355,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         if (spawn_x > 0) {
             if (n_meteors < 32) {
                 printk(KERN_ALERT "drawing new meteor at %d\n", spawn_x);
+                printk(KERN_ALERT "Number of meteors before adding %d\n", i);
                 meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
                 if (!new_position) {
                     pr_err("Failed to allocate new meteor pointer");
@@ -382,6 +383,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
 
                 meteors_x[n_meteors] = spawn_x;
                 meteors_y[n_meteors] = 0;
+                printk(KERN_ALERT "Number of meteors after adding %d\n", i);
             } else {
                 printk(KERN_ALERT "reached max number of meteors, skipping this creation\n");
             }
