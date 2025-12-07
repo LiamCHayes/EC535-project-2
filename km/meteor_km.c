@@ -206,10 +206,12 @@ static void __exit meteor_exit(void) {
 }
 
 static int meteor_open(struct inode *inode, struct file *filp) {
+    printk(KERN_ALERT "Opening the file!\n");
+
     // start the timer
     timer_setup(timer, meteor_handler, 0);
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
-    printk(KERN_ALERT "Started the timer!");
+    printk(KERN_ALERT "Started the timer!\n");
 
     // add the character
     character = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
