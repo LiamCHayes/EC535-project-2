@@ -48,11 +48,11 @@ typedef struct meteor_position {
 } meteor_position_t;
 
 static struct timer_list * timer;
-static int meteor_update_rate_ms = 1000;
+static int meteor_update_rate_ms = 100;
 static meteor_position_t *meteors[32];
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
-static int meteor_falling_rate = 2;
+static int meteor_falling_rate = 1;
 
 // Helper functions
 /* Helper function borrowed from drivers/video/fbdev/core/fbmem.c */
@@ -99,7 +99,7 @@ static void meteor_handler(struct timer_list *data) {
     // Move all meteors down a few pixels
     int i;
     for (i=0; i<n_meteors; i++) {
-        printk(KERN_ALERT "Redrawing meteor %d\n", i);
+        printk(KERN_ALERT "Redrawing meteor %d at %d\n", i, meteors[i]->dy + meteor_falling_rate);
         // Redraw meteor
         new_meteor_position->dx = meteors[i]->dx;
         new_meteor_position->dy = meteors[i]->dy + meteor_falling_rate;
@@ -139,6 +139,15 @@ static int __init meteor_init(void)
     timer_setup(timer, meteor_handler, 0);
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
 
+    // Allocate memory for a temporary meteor to update positions
+    new_meteor_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
+    if (!new_position) {
+        pr_err("Failed to allocate new meteor pointer");
+        kfree(blank);
+        kfree(timer);
+        return -ENOMEM;
+    }
+
     // TEST Draw a meteor and have it fall
     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
     printk(KERN_ALERT "drawing new meteor\n");
@@ -168,14 +177,6 @@ static int __init meteor_init(void)
         printk(KERN_ALERT "Adding new meteor to list\n");
         meteors[n_meteors] = new_position;
         n_meteors ++;
-    }
-
-    new_meteor_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
-    if (!new_position) {
-        pr_err("Failed to allocate new meteor pointer");
-        kfree(blank);
-        kfree(timer);
-        return -ENOMEM;
     }
 
     return 0;
