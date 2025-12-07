@@ -11,7 +11,6 @@
 #include <linux/string.h> // for string manipulation functions
 #include <linux/ctype.h> // for isdigit
 #include <linux/font.h> // for default font
-#include <string.h>
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Meteor game");
