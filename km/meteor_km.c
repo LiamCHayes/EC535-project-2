@@ -126,7 +126,6 @@ static void meteor_handler(struct timer_list *data) {
     }
 
     // Restart timer
-    printk(KERN_ALERT "timer up");
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
 }
 
@@ -187,10 +186,10 @@ static void __exit meteor_exit(void) {
 }
 
 static int meteor_open(struct inode *inode, struct file *filp) {
-    // TODO check if we are adding a new meteor
     // start the timer
     timer_setup(timer, meteor_handler, 0);
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
+    printk(KERN_ALERT "Started the timer!");
 
     // add the character
     character = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
@@ -215,10 +214,11 @@ static int meteor_open(struct inode *inode, struct file *filp) {
     sys_fillrect(info, blank);
     unlock_fb_info(info);
 
-    // TODO move the character
+    printk(KERN_ALERT "Added the character!");
 }
 
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
+    printk(KERN_ALERT "Start of write function!");
     size_t bytes_to_copy = 16;
     char buffer[16];
     int ret;
