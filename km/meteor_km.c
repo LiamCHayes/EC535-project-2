@@ -52,7 +52,7 @@ static int meteor_update_rate_ms = 10;
 static meteor_position_t *meteors[32];
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
-static int meteor_falling_rate = 5;
+static int meteor_falling_rate = 100000;
 
 // Helper functions
 /* Helper function borrowed from drivers/video/fbdev/core/fbmem.c */
