@@ -391,6 +391,8 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
 }
 
 static int meteor_release(struct inode *inode, struct file *filp) {
+    printk(KERN_ALERT "Releasing the file!\n");
+    del_timer_sync(timer);
     kfree(character);
     int i;
     for (i = 0; i < n_meteors; i++) {
