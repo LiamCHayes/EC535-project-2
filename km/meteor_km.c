@@ -258,9 +258,8 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         pr_err("failed to copy bytes from userspace\n");
         return -EFAULT;
     }
-    printk(KERN_ALERT "%d\n", count);
     int i;
-    for (i=0; i<32; i++) {
+    for (i=0; i<count; i++) {
         printk(KERN_ALERT "%c\n", buffer[i]);
     }
 
