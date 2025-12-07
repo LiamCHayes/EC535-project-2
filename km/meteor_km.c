@@ -165,12 +165,21 @@ static int __init meteor_init(void)
         return -ENOMEM;
     }
 
-    // Allocate memory for a temporary meteor to update positions
+    // Allocate memory for a temporary meteor and character to update positions
     new_meteor_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
     if (!new_meteor_position) {
         pr_err("Failed to allocate new meteor pointer");
         kfree(blank);
         kfree(timer);
+        return -ENOMEM;
+    }
+
+    new_character_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
+    if (!new_character_positon) {
+        pr_err("Failed to allocate new character pointer");
+        kfree(blank);
+        kfree(timer);
+        kfree(new_meteor_position);
         return -ENOMEM;
     }
 
@@ -200,6 +209,7 @@ static void __exit meteor_exit(void) {
     kfree(blank);
     kfree(timer);
     kfree(new_meteor_position);
+    kfree(new_character_position);
     if (character) {
         kfree(character);
     }
