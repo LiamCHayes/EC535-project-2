@@ -57,7 +57,7 @@ static struct mutex meteor_mutex;
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
 static int meteor_falling_rate = 4;
-static int meteor_size = 60;
+static int meteor_size = 75;
 
 static meteor_position_t * character;
 static meteor_position_t * new_character_position;
@@ -361,7 +361,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     }
                     new_position->dx = 0;
                     new_position->dy = 0;
-                    new_position->width = 450;
+                    new_position->width = 500;
                     new_position->height = 280;
 
                     blank->dx = new_position->dx;
