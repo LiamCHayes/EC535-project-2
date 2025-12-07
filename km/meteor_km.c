@@ -239,7 +239,7 @@ static int meteor_open(struct inode *inode, struct file *filp) {
 }
 
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
-    printk(KERN_ALERT "Start of write function!");
+    printk(KERN_ALERT "Start of write function!\n");
     size_t bytes_to_copy = 16;
     char buffer[16];
     int ret;
