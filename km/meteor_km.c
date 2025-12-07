@@ -337,16 +337,15 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         int i;
         int meteor_x;
         int meteor_y;
-        for (i=0; i<n_meteors; ) {
+        for (i=0; i<n_meteors; i++) {
             meteor_x = meteors_x[i];
             meteor_y = meteors_y[i];
             int x_difference = character_x - meteor_x;
-            printk(KERN_ALERT "x_difference %d\n", x_difference);
-            // if (meteor_y > meteor_size + 20) {
-                // if (x_difference > 0 && x_difference < meteor_size) {
-                    // printk(KERN_ALERT "Collision detected\n");
-                // }
-            // }
+            if (meteor_y > meteor_size + 20) {
+                if (x_difference > 0 && x_difference < meteor_size) {
+                    printk(KERN_ALERT "Collision detected\n");
+                }
+            }
         }
 
         // Add a new meteor
