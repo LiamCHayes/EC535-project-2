@@ -48,7 +48,7 @@ typedef struct meteor_position {
 } meteor_position_t;
 
 static struct timer_list * timer;
-static int meteor_update_rate_ms = 10000;
+static int meteor_update_rate_ms = 1000;
 static meteor_position_t *meteors[32];
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
@@ -87,7 +87,7 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
     blank->dy = new_position->dy;
     blank->width = new_position->width;
     blank->height = new_position->height;
-    blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
+    blank->color = CYG_FB_DEFAULT_PALETTE_RED;
     blank->rop = ROP_COPY;
     lock_fb_info(info);
     sys_fillrect(info, blank);
