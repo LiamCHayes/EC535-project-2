@@ -135,7 +135,7 @@ static int __init meteor_init(void)
 {
     // Device file
     int registration;
-    registration = register_chrdev(61, meteor_dash, &meteor_fops);
+    registration = register_chrdev(61, "meteor_dash", &meteor_fops);
     if (registration < 0) { 
         pr_err("could not register device file");
         return registration;
