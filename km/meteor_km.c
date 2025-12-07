@@ -173,6 +173,8 @@ static int __init meteor_init(void)
     // Meteor array mutex
     mutex_init(&meteor_mutex);
 
+    printk(KERN_INFO "Module initialized!\n");
+
     return 0;
 }
 
