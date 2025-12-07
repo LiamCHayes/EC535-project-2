@@ -142,7 +142,6 @@ static void meteor_handler(struct timer_list *data) {
 
         // Update meteor position in list
         meteors[i]->dy = meteors[i]->dy + meteor_falling_rate;
-        meteors_y[i] = meteors[i]->dy + meteor_falling_rate;
 
         // Delete meteor if it went past the screen
         if (meteors[i]->dy > 280) {
