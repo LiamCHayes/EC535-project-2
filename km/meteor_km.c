@@ -57,7 +57,7 @@ static struct mutex meteor_mutex;
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
 static int meteor_falling_rate = 4;
-static int meteor_size = 100;
+static int meteor_size = 60;
 
 static meteor_position_t * character;
 static meteor_position_t * new_character_position;
@@ -331,24 +331,24 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         character->dx = character_x;
 
         // Check if there is a collision
-        int i;
-        int meteor_x;
-        int meteor_y;
-        mutex_lock(&meteor_mutex);
-        for (i=0; i<n_meteors; i++) {
-            meteor_x = meteors[i]->dx;
-            meteor_y = meteors[i]->dy;
-            int x_difference = character_x - meteor_x;
-            if (meteor_y > 280 - meteor_size + 20) {
-                if (x_difference > 0 && x_difference < meteor_size) {
-                    printk(KERN_ALERT "%d %d %d %d %d\n", meteor_x, meteor_y, x_difference, meteor_size, character_x);
-                    printk(KERN_ALERT "Collision detected\n");
-                    mutex_unlock(&meteor_mutex);
-                    return -1;
-                }
-            }
-        }
-        mutex_unlock(&meteor_mutex);
+        // int i;
+        // int meteor_x;
+        // int meteor_y;
+        // mutex_lock(&meteor_mutex);
+        // for (i=0; i<n_meteors; i++) {
+            // meteor_x = meteors[i]->dx;
+            // meteor_y = meteors[i]->dy;
+            // int x_difference = character_x - meteor_x;
+            // if (meteor_y > 280 - meteor_size + 20) {
+                // if (x_difference > 0 && x_difference < meteor_size) {
+                    // printk(KERN_ALERT "%d %d %d %d %d\n", meteor_x, meteor_y, x_difference, meteor_size, character_x);
+                    // printk(KERN_ALERT "Collision detected\n");
+                    // mutex_unlock(&meteor_mutex);
+                    // return -1;
+                // }
+            // }
+        // }
+        // mutex_unlock(&meteor_mutex);
 
         // Add a new meteor
         if (spawn_x > 0) {
