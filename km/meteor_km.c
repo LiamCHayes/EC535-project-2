@@ -283,7 +283,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     }
     mutex_unlock(&meteor_mutex);
 
-    *fpos += count;
     return count;
 }
 
