@@ -52,7 +52,7 @@ static int meteor_update_rate_ms = 100;
 static meteor_position_t *meteors[32];
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
-static int meteor_falling_rate = 1;
+static int meteor_falling_rate = 2;
 
 // Helper functions
 /* Helper function borrowed from drivers/video/fbdev/core/fbmem.c */
@@ -98,7 +98,7 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
 static void meteor_handler(struct timer_list *data) {
     // Move all meteors down a few pixels
     int i;
-    for (i=0; i<n_meteors; i++) {
+    for (i=0; i<n_meteors; ) {
         printk(KERN_ALERT "Redrawing meteor %d at %d\n", i, meteors[i]->dy + meteor_falling_rate);
         // Redraw meteor
         new_meteor_position->dx = meteors[i]->dx;
@@ -109,6 +109,18 @@ static void meteor_handler(struct timer_list *data) {
 
         // Update meteor position in list
         meteors[i]->dy = meteors[i]->dy + meteor_falling_rate;
+
+        // Delete meteor if it went past the screen
+        if (meteors[i]->dy > 280) {
+            kfree(meteors[i]);
+            int j;
+            for (j=i; j<n_meteors-1; j++) {
+                meteors[j] = meteors[j+1];
+            }
+            n_meteors--;
+        } else {
+            i++;
+        }
     }
 
     // Restart timer
@@ -148,7 +160,7 @@ static int __init meteor_init(void)
         return -ENOMEM;
     }
 
-    // TEST Draw a meteor and have it fall
+    // Allocate memory for adding a new meteor
     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
     printk(KERN_ALERT "drawing new meteor\n");
     if (!new_position) {
