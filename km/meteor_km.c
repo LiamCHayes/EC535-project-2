@@ -139,7 +139,7 @@ static int __init meteor_init(void)
         return -ENOMEM;
     }
 
-    // Start the meteor timer
+    // Allocate memory for the meteor timer
     timer = (struct timer_list *) kmalloc(sizeof(struct timer_list), GFP_KERNEL);
     if (!timer)
     {
@@ -148,8 +148,6 @@ static int __init meteor_init(void)
         kfree(blank);
         return -ENOMEM;
     }
-    timer_setup(timer, meteor_handler, 0);
-    mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
 
     // Allocate memory for a temporary meteor to update positions
     new_meteor_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
@@ -160,13 +158,56 @@ static int __init meteor_init(void)
         return -ENOMEM;
     }
 
-    // Allocate memory for adding a new meteor
+    return 0;
+}
+
+static void __exit meteor_exit(void) {
+    del_timer_sync(timer);
+    kfree(blank);
+    kfree(timer);
+    kfree(new_meteor_position);
+    if (info) {
+        atomic_dec(&info->count);
+    }
+
+    printk(KERN_INFO "Module exiting\n");
+}
+
+static int meteor_open(struct inode *inode, struct file *filp) {
+    // start the timer
+    timer_setup(timer, meteor_handler, 0);
+    mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
+
+    // add the character
+    meteor_position_t *character = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
+    printk(KERN_ALERT "drawing the character\n");
+    if (!character) {
+        pr_err("Failed to allocate new character pointer");
+        return -ENOMEM;
+    }
+    new_position->dx = 250;
+    new_position->dy = 250;
+    new_position->width = 20;
+    new_position->height = 20;
+
+    blank->dx = character->dx;
+    blank->dy = character->dy;
+    blank->width = character->width;
+    blank->height = character->height;
+    blank->color = CYG_FB_DEFAULT_PALETTE_LIGHTBLUE;
+    blank->rop = ROP_COPY;
+    info = get_fb_info(0);
+    lock_fb_info(info);
+    sys_fillrect(info, blank);
+    unlock_fb_info(info);
+}
+
+static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
+    // Add character
     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
     printk(KERN_ALERT "drawing new meteor\n");
     if (!new_position) {
         pr_err("Failed to allocate new meteor pointer");
-        kfree(blank);
-        kfree(timer);
         return -ENOMEM;
     }
     new_position->dx = 200;
@@ -191,25 +232,6 @@ static int __init meteor_init(void)
         n_meteors ++;
     }
 
-    return 0;
-}
-
-static void __exit meteor_exit(void) {
-    del_timer_sync(timer);
-    kfree(blank);
-    kfree(timer);
-    kfree(new_meteor_position);
-    if (info) {
-        atomic_dec(&info->count);
-    }
-
-    printk(KERN_INFO "Module exiting\n");
-}
-
-static int meteor_open(struct inode *inode, struct file *filp) {
-}
-
-static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
 
 }
 
