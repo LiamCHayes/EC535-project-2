@@ -325,7 +325,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         meteor_falling_rate = spawn_x;
     } else {
         // Redraw the character
-        printk(KERN_ALERT "drawing character at %d\n", character_x);
         new_character_position->dx = character_x;
         new_character_position->dy = 250;
         new_character_position->width = 20;
@@ -334,21 +333,21 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         character->dx = character_x;
 
         // Check if there is a collision
-        // int i;
-        // int meteor_x;
-        // int meteor_y;
-        // for (i=0; i<n_meteors; i++) {
-            // meteor_x = meteors_x[i];
-            // meteor_y = meteors_y[i];
-            // int x_difference = character_x - meteor_x;
-            // if (meteor_y > meteor_size + 20) {
-                // if (x_difference > 0 && x_difference < meteor_size) {
-                    // printk(KERN_ALERT "%d %d %d %d %d\n", meteor_x, meteor_y, x_difference, meteor_size, character_x);
-                    // printk(KERN_ALERT "Collision detected\n");
-                    // return -1;
-                // }
-            // }
-        // }
+        int i;
+        int meteor_x;
+        int meteor_y;
+        for (i=0; i<n_meteors; i++) {
+            meteor_x = meteors_x[i];
+            meteor_y = meteors_y[i];
+            int x_difference = character_x - meteor_x;
+            if (meteor_y > meteor_size + 20) {
+                if (x_difference > 0 && x_difference < meteor_size) {
+                    printk(KERN_ALERT "%d %d %d %d %d\n", meteor_x, meteor_y, x_difference, meteor_size, character_x);
+                    printk(KERN_ALERT "Collision detected\n");
+                    return -1;
+                }
+            }
+        }
 
         // Add a new meteor
         if (spawn_x > 0) {
@@ -375,7 +374,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                 unlock_fb_info(info);
 
                 mutex_lock(&meteor_mutex);
-                printk(KERN_ALERT "Adding new meteor to list\n");
                 meteors[n_meteors] = new_position;
                 n_meteors ++;
                 mutex_unlock(&meteor_mutex);
@@ -393,6 +391,14 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
 
 static int meteor_release(struct inode *inode, struct file *filp) {
     kfree(character);
+    int i;
+    for (i = 0; i < n_meteors; i++) {
+        if (meteors[i]) {
+            kfree(meteors[i]);
+            meteors[i] = NULL; // Best practice
+        }
+    }
+    n_meteors = 0;
 }
 
 module_init(meteor_init);
