@@ -176,6 +176,9 @@ static int __init meteor_init(void)
     // Meteor array mutex
     mutex_init(&meteor_mutex);
 
+    // Initialize framebuffer info
+    info = get_fb_info(0);
+
     printk(KERN_INFO "Module initialized!\n");
 
     return 0;
@@ -234,7 +237,6 @@ static int meteor_open(struct inode *inode, struct file *filp) {
     blank->height = character->height;
     blank->color = CYG_FB_DEFAULT_PALETTE_LIGHTBLUE;
     blank->rop = ROP_COPY;
-    info = get_fb_info(0);
     lock_fb_info(info);
     sys_fillrect(info, blank);
     unlock_fb_info(info);
