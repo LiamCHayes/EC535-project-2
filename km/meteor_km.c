@@ -334,7 +334,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         meteor_x = meteors[i]->dx;
         meteor_y = meteors[i]->dy + meteor_falling_rate;
         int x_difference = character_x - meteor_x;
-        if (meteor_y < meteor_size + 20) {
+        if (meteor_y > meteor_size + 20) {
             if (x_difference > 0 && x_difference < meteor_size) {
                 return -1;
             }
