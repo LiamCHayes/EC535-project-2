@@ -248,6 +248,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         return -EFAULT;
     }
     buffer[count] = '\0';
+    printk(KERN_ALERT "%d\n", count);
     int i;
     for (i=0; i<16; i++) {
         printk(KERN_ALERT "%c\n", buffer[i]);
