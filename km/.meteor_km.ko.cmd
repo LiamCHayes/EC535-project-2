@@ -1,1 +1,0 @@
-cmd_/ad/eng/users/l/i/liamh/EC535/EC535-project-2/km/meteor_km.ko := arm-linux-gnueabihf-ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /ad/eng/users/l/i/liamh/EC535/EC535-project-2/km/meteor_km.ko /ad/eng/users/l/i/liamh/EC535/EC535-project-2/km/meteor_km.o /ad/eng/users/l/i/liamh/EC535/EC535-project-2/km/meteor_km.mod.o ;  true
