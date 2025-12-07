@@ -104,7 +104,6 @@ static void meteor_handler(struct timer_list *data) {
     int i;
     mutex_lock(&meteor_mutex);
     for (i=0; i<n_meteors; ) {
-        printk(KERN_ALERT "Redrawing meteor %d at %d\n", i, meteors[i]->dy + meteor_falling_rate);
         // Redraw meteor
         new_meteor_position->dx = meteors[i]->dx;
         new_meteor_position->dy = meteors[i]->dy + meteor_falling_rate;
@@ -248,8 +247,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         pr_err("failed to copy bytes from userspace\n");
         return -EFAULT;
     }
-    printk(KERN_ALERT, "%s\n", buffer);
-
+    printk(KERN_ALERT "%s\n", buffer);
 
     // Add a new meteor
     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
@@ -280,7 +278,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         n_meteors ++;
     }
     mutex_unlock(&meteor_mutex);
-
 }
 
 static int meteor_release(struct inode *inode, struct file *filp) {
