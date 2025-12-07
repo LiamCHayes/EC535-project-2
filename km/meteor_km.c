@@ -59,6 +59,7 @@ static int n_meteors = 0;
 static int meteor_falling_rate = 2;
 
 static meteor_position_t * character;
+static meteor_position_t * new_character_position;
 
 // Helper functions
 /* Helper function borrowed from drivers/video/fbdev/core/fbmem.c */
@@ -251,6 +252,7 @@ static ssize_t meteor_read(struct file *filp, char *buf, size_t count, loff_t *f
 
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
     printk(KERN_ALERT "Start of write function!\n");
+    // Read from userspace
     char buffer[8];
     int ret;
     ret = copy_from_user(&buffer, buf, count);
@@ -259,46 +261,67 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         return -EFAULT;
     }
 
+    // Parse message
     char *temp_str;
     char *character_location;
     char *spawn_location;
+    int character_x;
+    int spawn_x;
     const char *delimiter = ",";
     temp_str = buffer;
     character_location = strsep(&temp_str, delimiter);
     spawn_location = strsep(&temp_str, delimiter);
 
-    printk(KERN_ALERT "Character location %s\n", character_location);
-    printk(KERN_ALERT "Spawn location %s\n", spawn_location);
-
-    // Add a new meteor
-    meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
-    printk(KERN_ALERT "drawing new meteor\n");
-    if (!new_position) {
-        pr_err("Failed to allocate new meteor pointer");
-        return -ENOMEM;
+    // Cast to int
+    ret = kstrtoint(character_location, 10, &character_x);
+    if (ret < 0) {
+        pr_err("Failed to parse character to int\n");
     }
-    new_position->dx = 200;
-    new_position->dy = 0;
-    new_position->width = 40;
-    new_position->height = 40;
-
-    blank->dx = new_position->dx;
-    blank->dy = new_position->dy;
-    blank->width = new_position->width;
-    blank->height = new_position->height;
-    blank->color = CYG_FB_DEFAULT_PALETTE_RED;
-    blank->rop = ROP_COPY;
-    lock_fb_info(info);
-    sys_fillrect(info, blank);
-    unlock_fb_info(info);
-
-    mutex_lock(&meteor_mutex);
-    if (n_meteors < 32) {
-        printk(KERN_ALERT "Adding new meteor to list\n");
-        meteors[n_meteors] = new_position;
-        n_meteors ++;
+    ret = kstrtoint(spawn_location, 10, &spawn_x);
+    if (ret < 0) {
+        pr_err("Failed to parse spawn to int\n");
     }
-    mutex_unlock(&meteor_mutex);
+
+    // Redraw the character
+    new_character_position->dx = character_location;
+    new_character_position->dy = 250;
+    new_character_position->width = 20;
+    new_character_position->height = 20;
+    redraw_meteor(character, new_character_position);
+
+    if (spawn_x > 0) {
+        // Add a new meteor
+        if (n_meteors < 32) {
+            printk(KERN_ALERT "drawing new meteor\n");
+            meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
+            if (!new_position) {
+                pr_err("Failed to allocate new meteor pointer");
+                return -ENOMEM;
+            }
+            new_position->dx = 200;
+            new_position->dy = 0;
+            new_position->width = 40;
+            new_position->height = 40;
+
+            blank->dx = new_position->dx;
+            blank->dy = new_position->dy;
+            blank->width = new_position->width;
+            blank->height = new_position->height;
+            blank->color = CYG_FB_DEFAULT_PALETTE_RED;
+            blank->rop = ROP_COPY;
+            lock_fb_info(info);
+            sys_fillrect(info, blank);
+            unlock_fb_info(info);
+
+            mutex_lock(&meteor_mutex);
+            printk(KERN_ALERT "Adding new meteor to list\n");
+            meteors[n_meteors] = new_position;
+            n_meteors ++;
+            mutex_unlock(&meteor_mutex);
+        } else {
+            printk(KERN_ALERT "reached max number of meteors, skipping this creation\n");
+        }
+    }
 
     return count;
 }
