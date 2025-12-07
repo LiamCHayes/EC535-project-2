@@ -47,10 +47,10 @@ __attribute__((section("__versions"))) = {
 	{ 0x37a0cba, "kfree" },
 	{ 0xc38c83b8, "mod_timer" },
 	{ 0x526c3a6c, "jiffies" },
-	{ 0xdd18bb88, "_mutex_lock" },
 	{ 0xd09cfa79, "_mutex_unlock" },
 	{ 0x336aa937, "sys_fillrect" },
 	{ 0x6fb021c9, "lock_fb_info" },
+	{ 0xdd18bb88, "_mutex_lock" },
 	{ 0x2e5810c6, "__aeabi_unwind_cpp_pr1" },
 	{ 0xb1ad28e0, "__gnu_mcount_nc" },
 };
