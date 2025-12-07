@@ -133,6 +133,14 @@ static void meteor_handler(struct timer_list *data) {
 // Device file functions
 static int __init meteor_init(void)
 {
+    // Device file
+    int registration;
+    registration = register_chrdev(61, meteor_dash, &meteor_fops);
+    if (registration < 0) { 
+        pr_err("could not register device file");
+        return registration;
+    }
+
     // Make memory for drawing rectangles
     blank = kmalloc(sizeof(struct fb_fillrect), GFP_KERNEL);
     if (!blank) {
