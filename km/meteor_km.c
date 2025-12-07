@@ -322,7 +322,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     }
 
     if (character_x < 0) {
-        meteor_falling_rate = spawn_x
+        meteor_falling_rate = spawn_x;
     } else {
         // Redraw the character
         printk(KERN_ALERT "drawing character at %d\n", character_x);
