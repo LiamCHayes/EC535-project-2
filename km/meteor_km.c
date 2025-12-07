@@ -25,11 +25,14 @@ MODULE_DESCRIPTION("Meteor game");
 static int meteor_open(struct inode *inode, struct file *filp);
 static int meteor_release(struct inode *inode, struct file *filp);
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos);
+static ssize_t meteor_read(struct file *filp, char *buf, size_t count, loff_t *f_pos);
 static void meteor_handler(struct timer_list*);
 
 struct file_operations meteor_fops = {
 write:
     meteor_write,
+read:
+    meteor_read,
 open:
     meteor_open,
 release:
@@ -239,6 +242,9 @@ static int meteor_open(struct inode *inode, struct file *filp) {
     printk(KERN_ALERT "Added the character!");
 
     return 0;
+}
+
+static ssize_t meteor_read(struct file *filp, char *buf, size_t count, loff_t *f_pos) {
 }
 
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
