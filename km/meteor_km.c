@@ -185,10 +185,10 @@ static int meteor_open(struct inode *inode, struct file *filp) {
         pr_err("Failed to allocate new character pointer");
         return -ENOMEM;
     }
-    new_position->dx = 250;
-    new_position->dy = 250;
-    new_position->width = 20;
-    new_position->height = 20;
+    character->dx = 250;
+    character->dy = 250;
+    character->width = 20;
+    character->height = 20;
 
     blank->dx = character->dx;
     blank->dy = character->dy;
