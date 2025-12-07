@@ -175,7 +175,7 @@ static int __init meteor_init(void)
     }
 
     new_character_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
-    if (!new_character_positon) {
+    if (!new_character_position) {
         pr_err("Failed to allocate new character pointer");
         kfree(blank);
         kfree(timer);
