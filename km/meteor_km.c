@@ -322,6 +322,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     new_character_position->width = 20;
     new_character_position->height = 20;
     redraw_character(character, new_character_position);
+    character->dx = character_x;
 
     if (spawn_x > 0) {
         // Add a new meteor
