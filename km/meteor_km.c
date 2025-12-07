@@ -261,7 +261,6 @@ static ssize_t meteor_read(struct file *filp, char *buf, size_t count, loff_t *f
 }
 
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
-    printk(KERN_ALERT "Start of write function!\n");
     // Read from userspace
     char buffer[8];
     int ret;
@@ -293,7 +292,8 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     }
 
     // Redraw the character
-    new_character_position->dx = character_location;
+    printk(KERN_ALERT "drawing character at %d\n", character_x);
+    new_character_position->dx = character_x;
     new_character_position->dy = 250;
     new_character_position->width = 20;
     new_character_position->height = 20;
@@ -302,13 +302,13 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     if (spawn_x > 0) {
         // Add a new meteor
         if (n_meteors < 32) {
-            printk(KERN_ALERT "drawing new meteor\n");
+            printk(KERN_ALERT "drawing new meteor at %d\n", spawn_x);
             meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
             if (!new_position) {
                 pr_err("Failed to allocate new meteor pointer");
                 return -ENOMEM;
             }
-            new_position->dx = 200;
+            new_position->dx = spawn_x;
             new_position->dy = 0;
             new_position->width = 40;
             new_position->height = 40;
