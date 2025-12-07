@@ -223,8 +223,6 @@ static int __init meteor_init(void)
 }
 
 static void __exit meteor_exit(void) {
-    del_timer_sync(timer);
-
     int i;
     for (i = 0; i < n_meteors; i++) {
         if (meteors[i]) {
@@ -238,9 +236,6 @@ static void __exit meteor_exit(void) {
     kfree(timer);
     kfree(new_meteor_position);
     kfree(new_character_position);
-    if (character) {
-        kfree(character);
-    }
     if (info) {
         atomic_dec(&info->count);
     }
@@ -284,6 +279,21 @@ static int meteor_open(struct inode *inode, struct file *filp) {
 
     return 0;
 }
+
+static int meteor_release(struct inode *inode, struct file *filp) {
+    printk(KERN_ALERT "Releasing the file!\n");
+    del_timer_sync(timer);
+    kfree(character);
+    int i;
+    for (i = 0; i < n_meteors; i++) {
+        if (meteors[i]) {
+            kfree(meteors[i]);
+            meteors[i] = NULL; // Best practice
+        }
+    }
+    n_meteors = 0;
+}
+
 
 static ssize_t meteor_read(struct file *filp, char *buf, size_t count, loff_t *f_pos) {
 }
@@ -365,7 +375,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     unlock_fb_info(info);
 
                     mutex_unlock(&meteor_mutex);
-                    return -1;
+                    return -2;
                 }
             }
         }
@@ -409,20 +419,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     }
 
     return count;
-}
-
-static int meteor_release(struct inode *inode, struct file *filp) {
-    printk(KERN_ALERT "Releasing the file!\n");
-    del_timer_sync(timer);
-    kfree(character);
-    int i;
-    for (i = 0; i < n_meteors; i++) {
-        if (meteors[i]) {
-            kfree(meteors[i]);
-            meteors[i] = NULL; // Best practice
-        }
-    }
-    n_meteors = 0;
 }
 
 module_init(meteor_init);
