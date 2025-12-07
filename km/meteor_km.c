@@ -53,6 +53,8 @@ typedef struct meteor_position {
 static struct timer_list * timer;
 static int meteor_update_rate_ms = 100;
 static meteor_position_t *meteors[32];
+static int meteors_x[32];
+static int meteors_y[32];
 static struct mutex meteor_mutex;
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
@@ -142,6 +144,7 @@ static void meteor_handler(struct timer_list *data) {
 
         // Update meteor position in list
         meteors[i]->dy = meteors[i]->dy + meteor_falling_rate;
+        meteors_y[i] = meteors[i]->dy + meteor_falling_rate;
 
         // Delete meteor if it went past the screen
         if (meteors[i]->dy > 280) {
@@ -149,6 +152,8 @@ static void meteor_handler(struct timer_list *data) {
             int j;
             for (j=i; j<n_meteors-1; j++) {
                 meteors[j] = meteors[j+1];
+                meteors_x[j] = meteors_x[j+1];
+                meteors_y[j] = meteors_y[j+1];
             }
             n_meteors--;
         } else {
@@ -316,63 +321,68 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         pr_err("Failed to parse spawn to int\n");
     }
 
-    // Redraw the character
-    printk(KERN_ALERT "drawing character at %d\n", character_x);
-    new_character_position->dx = character_x;
-    new_character_position->dy = 250;
-    new_character_position->width = 20;
-    new_character_position->height = 20;
-    redraw_character(character, new_character_position);
-    character->dx = character_x;
+    if (character_x < 0) {
+        meteor_falling_rate = spawn_x
+    } else {
+        // Redraw the character
+        printk(KERN_ALERT "drawing character at %d\n", character_x);
+        new_character_position->dx = character_x;
+        new_character_position->dy = 250;
+        new_character_position->width = 20;
+        new_character_position->height = 20;
+        redraw_character(character, new_character_position);
+        character->dx = character_x;
 
-    // Check if there is a collision
-    int i;
-    int meteor_x;
-    int meteor_y;
-    mutex_lock(&meteor_mutex);
-    for (i=0; i<n_meteors; ) {
-        meteor_x = meteors[i]->dx;
-        meteor_y = meteors[i]->dy + meteor_falling_rate;
-        int x_difference = character_x - meteor_x;
-        if (meteor_y < meteor_size + 20) {
-            if (x_difference > 0 && x_difference < meteor_size) {
-                return -2;
+        // Check if there is a collision
+        int i;
+        int meteor_x;
+        int meteor_y;
+        for (i=0; i<n_meteors; ) {
+            meteor_x = meteors_x[i];
+            meteor_y = meteors_y[i];
+            int x_difference = character_x - meteor_x;
+            if (meteor_y > meteor_size + 20) {
+                if (x_difference > 0 && x_difference < meteor_size) {
+                    return -2;
+                }
             }
         }
-    }
-    mutex_unlock(&meteor_mutex);
 
-    // Add a new meteor
-    if (spawn_x > 0) {
-        if (n_meteors < 32) {
-            printk(KERN_ALERT "drawing new meteor at %d\n", spawn_x);
-            meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
-            if (!new_position) {
-                pr_err("Failed to allocate new meteor pointer");
-                return -ENOMEM;
+        // Add a new meteor
+        if (spawn_x > 0) {
+            if (n_meteors < 32) {
+                printk(KERN_ALERT "drawing new meteor at %d\n", spawn_x);
+                meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
+                if (!new_position) {
+                    pr_err("Failed to allocate new meteor pointer");
+                    return -ENOMEM;
+                }
+                new_position->dx = spawn_x;
+                new_position->dy = 0;
+                new_position->width = meteor_size;
+                new_position->height = meteor_size;
+
+                blank->dx = new_position->dx;
+                blank->dy = new_position->dy;
+                blank->width = new_position->width;
+                blank->height = new_position->height;
+                blank->color = CYG_FB_DEFAULT_PALETTE_RED;
+                blank->rop = ROP_COPY;
+                lock_fb_info(info);
+                sys_fillrect(info, blank);
+                unlock_fb_info(info);
+
+                mutex_lock(&meteor_mutex);
+                printk(KERN_ALERT "Adding new meteor to list\n");
+                meteors[n_meteors] = new_position;
+                n_meteors ++;
+                mutex_unlock(&meteor_mutex);
+
+                meteors_x[n_meteors] = spawn_x;
+                meteors_y[n_meteors] = 0;
+            } else {
+                printk(KERN_ALERT "reached max number of meteors, skipping this creation\n");
             }
-            new_position->dx = spawn_x;
-            new_position->dy = 0;
-            new_position->width = meteor_size;
-            new_position->height = meteor_size;
-
-            blank->dx = new_position->dx;
-            blank->dy = new_position->dy;
-            blank->width = new_position->width;
-            blank->height = new_position->height;
-            blank->color = CYG_FB_DEFAULT_PALETTE_RED;
-            blank->rop = ROP_COPY;
-            lock_fb_info(info);
-            sys_fillrect(info, blank);
-            unlock_fb_info(info);
-
-            mutex_lock(&meteor_mutex);
-            printk(KERN_ALERT "Adding new meteor to list\n");
-            meteors[n_meteors] = new_position;
-            n_meteors ++;
-            mutex_unlock(&meteor_mutex);
-        } else {
-            printk(KERN_ALERT "reached max number of meteors, skipping this creation\n");
         }
     }
 
