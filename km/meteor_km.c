@@ -339,7 +339,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
             meteor_x = meteors[i]->dx;
             meteor_y = meteors[i]->dy;
             int x_difference = character_x - meteor_x;
-            if (meteor_y > meteor_size + 20) {
+            if (meteor_y > 280 - meteor_size + 20) {
                 if (x_difference > 0 && x_difference < meteor_size) {
                     printk(KERN_ALERT "%d %d %d %d %d\n", meteor_x, meteor_y, x_difference, meteor_size, character_x);
                     printk(KERN_ALERT "Collision detected\n");
