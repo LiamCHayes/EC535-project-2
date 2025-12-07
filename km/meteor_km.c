@@ -234,6 +234,8 @@ static int meteor_open(struct inode *inode, struct file *filp) {
     unlock_fb_info(info);
 
     printk(KERN_ALERT "Added the character!");
+
+    return 0;
 }
 
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
