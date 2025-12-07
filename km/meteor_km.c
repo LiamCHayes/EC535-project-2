@@ -54,6 +54,8 @@ static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
 static int meteor_falling_rate = 2;
 
+static meteor_position_t * character;
+
 // Helper functions
 /* Helper function borrowed from drivers/video/fbdev/core/fbmem.c */
 static struct fb_info *get_fb_info(unsigned int idx)
@@ -166,6 +168,9 @@ static void __exit meteor_exit(void) {
     kfree(blank);
     kfree(timer);
     kfree(new_meteor_position);
+    if (character) {
+        kfree(character);
+    }
     if (info) {
         atomic_dec(&info->count);
     }
@@ -174,12 +179,13 @@ static void __exit meteor_exit(void) {
 }
 
 static int meteor_open(struct inode *inode, struct file *filp) {
+    // TODO check if we are adding a new meteor
     // start the timer
     timer_setup(timer, meteor_handler, 0);
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
 
     // add the character
-    meteor_position_t *character = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
+    character = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
     printk(KERN_ALERT "drawing the character\n");
     if (!character) {
         pr_err("Failed to allocate new character pointer");
@@ -200,9 +206,22 @@ static int meteor_open(struct inode *inode, struct file *filp) {
     lock_fb_info(info);
     sys_fillrect(info, blank);
     unlock_fb_info(info);
+
+    // TODO move the character
 }
 
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
+    size_t bytes_to_copy = 16;
+    char buffer[16];
+    int ret;
+    ret = copy_from_user(&buffer, buf, bytes_to_copy);
+    if (ret != 0) {
+        pr_err("failed to copy bytes from userspace\n");
+        return -EFAULT;
+    }
+    printk(KERN_ALERT, "%s\n", buffer);
+
+
     // Add character
     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
     printk(KERN_ALERT "drawing new meteor\n");
@@ -221,7 +240,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     blank->height = new_position->height;
     blank->color = CYG_FB_DEFAULT_PALETTE_RED;
     blank->rop = ROP_COPY;
-    info = get_fb_info(0);
     lock_fb_info(info);
     sys_fillrect(info, blank);
     unlock_fb_info(info);
@@ -232,11 +250,11 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         n_meteors ++;
     }
 
-
 }
 
 static int meteor_release(struct inode *inode, struct file *filp) {
 }
+
 module_init(meteor_init);
 module_exit(meteor_exit);
 
