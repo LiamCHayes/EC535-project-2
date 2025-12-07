@@ -51,12 +51,12 @@ typedef struct meteor_position {
 } meteor_position_t;
 
 static struct timer_list * timer;
-static int meteor_update_rate_ms = 200;
+static int meteor_update_rate_ms = 100;
 static meteor_position_t *meteors[32];
 static struct mutex meteor_mutex;
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
-static int meteor_falling_rate = 2;
+static int meteor_falling_rate = 4;
 
 static meteor_position_t * character;
 static meteor_position_t * new_character_position;
@@ -335,8 +335,8 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
             }
             new_position->dx = spawn_x;
             new_position->dy = 0;
-            new_position->width = 40;
-            new_position->height = 40;
+            new_position->width = 120;
+            new_position->height = 120;
 
             blank->dx = new_position->dx;
             blank->dy = new_position->dy;
