@@ -57,6 +57,7 @@ static struct mutex meteor_mutex;
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
 static int meteor_falling_rate = 4;
+static int meteor_size = 100;
 
 static meteor_position_t * character;
 static meteor_position_t * new_character_position;
@@ -324,8 +325,24 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     redraw_character(character, new_character_position);
     character->dx = character_x;
 
+    // Check if there is a collision
+    int meteor_x;
+    int meteor_y;
+    mutex_lock(&meteor_mutex);
+    for (i=0; i<n_meteors; ) {
+        meteor_x = meteors[i]->dx;
+        meteor_y = meteors[i]->dy + meteor_falling_rate;
+        int x_difference = character_x - meteor_x;
+        if (meteor_y < meteor_size + 20) {
+            if (x_difference > 0 && x_difference < meteor_size) {
+                return -1;
+            }
+        }
+    }
+    mutex_unlock(&meteor_mutex);
+
+    // Add a new meteor
     if (spawn_x > 0) {
-        // Add a new meteor
         if (n_meteors < 32) {
             printk(KERN_ALERT "drawing new meteor at %d\n", spawn_x);
             meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
@@ -335,8 +352,8 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
             }
             new_position->dx = spawn_x;
             new_position->dy = 0;
-            new_position->width = 120;
-            new_position->height = 120;
+            new_position->width = meteor_size;
+            new_position->height = meteor_size;
 
             blank->dx = new_position->dx;
             blank->dy = new_position->dy;
