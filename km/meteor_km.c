@@ -326,6 +326,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     character->dx = character_x;
 
     // Check if there is a collision
+    int i;
     int meteor_x;
     int meteor_y;
     mutex_lock(&meteor_mutex);
