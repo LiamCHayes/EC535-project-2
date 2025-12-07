@@ -248,7 +248,10 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         return -EFAULT;
     }
     buffer[count] = '\0';
-    printk(KERN_ALERT "%s\n", buffer);
+    int i;
+    for (i=0; i<16; i++) {
+        printk(KERN_ALERT "%c\n", buffer[i]);
+    }
 
     // Add a new meteor
     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
