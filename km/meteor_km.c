@@ -343,6 +343,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                 if (x_difference > 0 && x_difference < meteor_size) {
                     printk(KERN_ALERT "%d %d %d %d %d\n", meteor_x, meteor_y, x_difference, meteor_size, character_x);
                     printk(KERN_ALERT "Collision detected\n");
+                    mutex_unlock(&meteor_mutex);
                     return -1;
                 }
             }
