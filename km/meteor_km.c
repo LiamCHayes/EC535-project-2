@@ -239,10 +239,9 @@ static int meteor_open(struct inode *inode, struct file *filp) {
 
 static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
     printk(KERN_ALERT "Start of write function!\n");
-    size_t bytes_to_copy = 16;
     char buffer[16];
     int ret;
-    ret = copy_from_user(&buffer, buf, bytes_to_copy);
+    ret = copy_from_user(&buffer, buf, count);
     if (ret != 0) {
         pr_err("failed to copy bytes from userspace\n");
         return -EFAULT;
@@ -284,6 +283,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     }
     mutex_unlock(&meteor_mutex);
 
+    *fpos += count;
     return count;
 }
 
