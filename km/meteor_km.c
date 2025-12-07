@@ -50,6 +50,7 @@ typedef struct meteor_position {
 static struct timer_list * timer;
 static int meteor_update_rate_ms = 100;
 static meteor_position_t *meteors[32];
+static struct mutex meteor_mutex;
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
 static int meteor_falling_rate = 2;
@@ -98,8 +99,10 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
 
 // meteor timer handler
 static void meteor_handler(struct timer_list *data) {
+
     // Move all meteors down a few pixels
     int i;
+    mutex_lock(&meteor_mutex);
     for (i=0; i<n_meteors; ) {
         printk(KERN_ALERT "Redrawing meteor %d at %d\n", i, meteors[i]->dy + meteor_falling_rate);
         // Redraw meteor
@@ -124,6 +127,7 @@ static void meteor_handler(struct timer_list *data) {
             i++;
         }
     }
+    mutex_unlock(&meteor_mutex);
 
     // Restart timer
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
@@ -167,11 +171,24 @@ static int __init meteor_init(void)
         return -ENOMEM;
     }
 
+    // Meteor array mutex
+    mutex_init(&meteor_mutex);
+
     return 0;
 }
 
 static void __exit meteor_exit(void) {
     del_timer_sync(timer);
+
+    int i;
+    for (i = 0; i < n_meteors; i++) {
+        if (meteors[i]) {
+            kfree(meteors[i]);
+            meteors[i] = NULL; // Best practice
+        }
+    }
+    n_meteors = 0;
+
     kfree(blank);
     kfree(timer);
     kfree(new_meteor_position);
@@ -181,6 +198,8 @@ static void __exit meteor_exit(void) {
     if (info) {
         atomic_dec(&info->count);
     }
+
+    unregister_chrdev(61, "meteor_dash")
 
     printk(KERN_INFO "Module exiting\n");
 }
@@ -230,7 +249,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     printk(KERN_ALERT, "%s\n", buffer);
 
 
-    // Add character
+    // Add a new meteor
     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
     printk(KERN_ALERT "drawing new meteor\n");
     if (!new_position) {
@@ -252,11 +271,13 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     sys_fillrect(info, blank);
     unlock_fb_info(info);
 
+    mutex_lock(&meteor_mutex);
     if (n_meteors < 32) {
         printk(KERN_ALERT "Adding new meteor to list\n");
         meteors[n_meteors] = new_position;
         n_meteors ++;
     }
+    mutex_unlock(&meteor_mutex);
 
 }
 
