@@ -27,7 +27,6 @@ __used
 __attribute__((section("__versions"))) = {
 	{ 0xa16cf51b, "module_layout" },
 	{ 0x6bc3fbc0, "__unregister_chrdev" },
-	{ 0x97934ecf, "del_timer_sync" },
 	{ 0x1af2db6e, "registered_fb" },
 	{ 0xe0c33a74, "__mutex_do_init" },
 	{ 0x65e3c22d, "__rt_mutex_init" },
@@ -43,7 +42,6 @@ __attribute__((section("__versions"))) = {
 	{ 0xcf8d2e6f, "kmem_cache_alloc_trace" },
 	{ 0xb44e414c, "kmalloc_caches" },
 	{ 0xc6f46339, "init_timer_key" },
-	{ 0x7c32d0f0, "printk" },
 	{ 0xc38c83b8, "mod_timer" },
 	{ 0x526c3a6c, "jiffies" },
 	{ 0xd09cfa79, "_mutex_unlock" },
@@ -51,6 +49,8 @@ __attribute__((section("__versions"))) = {
 	{ 0x6fb021c9, "lock_fb_info" },
 	{ 0xdd18bb88, "_mutex_lock" },
 	{ 0x37a0cba, "kfree" },
+	{ 0x97934ecf, "del_timer_sync" },
+	{ 0x7c32d0f0, "printk" },
 	{ 0x2e5810c6, "__aeabi_unwind_cpp_pr1" },
 	{ 0xb1ad28e0, "__gnu_mcount_nc" },
 };
