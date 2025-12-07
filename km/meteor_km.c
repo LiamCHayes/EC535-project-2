@@ -141,7 +141,7 @@ static int __init meteor_init(void)
 
     // Allocate memory for a temporary meteor to update positions
     new_meteor_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
-    if (!new_position) {
+    if (!new_meteor_position) {
         pr_err("Failed to allocate new meteor pointer");
         kfree(blank);
         kfree(timer);
