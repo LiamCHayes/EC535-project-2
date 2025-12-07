@@ -35,6 +35,7 @@ __attribute__((section("__versions"))) = {
 	{ 0xdb7305a1, "__stack_chk_fail" },
 	{ 0x5f754e5a, "memset" },
 	{ 0x1e047854, "warn_slowpath_fmt" },
+	{ 0x85df9b6c, "strsep" },
 	{ 0x28cc25db, "arm_copy_from_user" },
 	{ 0x88db9f48, "__check_object_size" },
 	{ 0x8f678b07, "__stack_chk_guard" },
