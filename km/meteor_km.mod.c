@@ -27,6 +27,7 @@ __used
 __attribute__((section("__versions"))) = {
 	{ 0xa16cf51b, "module_layout" },
 	{ 0x97934ecf, "del_timer_sync" },
+	{ 0x1f6e82a4, "__register_chrdev" },
 	{ 0xdb7305a1, "__stack_chk_fail" },
 	{ 0x5f754e5a, "memset" },
 	{ 0x28cc25db, "arm_copy_from_user" },
