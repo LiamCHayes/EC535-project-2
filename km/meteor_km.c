@@ -283,6 +283,8 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         n_meteors ++;
     }
     mutex_unlock(&meteor_mutex);
+
+    return count;
 }
 
 static int meteor_release(struct inode *inode, struct file *filp) {
