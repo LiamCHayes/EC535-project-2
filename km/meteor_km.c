@@ -51,7 +51,7 @@ typedef struct meteor_position {
 } meteor_position_t;
 
 static struct timer_list * timer;
-static int meteor_update_rate_ms = 100;
+static int meteor_update_rate_ms = 200;
 static meteor_position_t *meteors[32];
 static struct mutex meteor_mutex;
 static meteor_position_t * new_meteor_position;
@@ -75,6 +75,30 @@ static struct fb_info *get_fb_info(unsigned int idx)
         atomic_inc(&fb_info->count);
 
     return fb_info;
+}
+
+static int redraw_character(meteor_position_t *old_position, meteor_position_t *new_position) {
+    // Draw rectangle at the old position in black
+    blank->dx = old_position->dx;
+    blank->dy = old_position->dy;
+    blank->width = old_position->width;
+    blank->height = old_position->height;
+    blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
+    blank->rop = ROP_COPY;
+    lock_fb_info(info);
+    sys_fillrect(info, blank);
+    unlock_fb_info(info);
+
+    // Draw rectangle at new position in red
+    blank->dx = new_position->dx;
+    blank->dy = new_position->dy;
+    blank->width = new_position->width;
+    blank->height = new_position->height;
+    blank->color = CYG_FB_DEFAULT_PALETTE_LIGHTBLUE;
+    blank->rop = ROP_COPY;
+    lock_fb_info(info);
+    sys_fillrect(info, blank);
+    unlock_fb_info(info);
 }
 
 static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new_position) {
@@ -297,7 +321,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
     new_character_position->dy = 250;
     new_character_position->width = 20;
     new_character_position->height = 20;
-    redraw_meteor(character, new_character_position);
+    redraw_character(character, new_character_position);
 
     if (spawn_x > 0) {
         // Add a new meteor
