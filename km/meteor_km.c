@@ -53,8 +53,6 @@ typedef struct meteor_position {
 static struct timer_list * timer;
 static int meteor_update_rate_ms = 100;
 static meteor_position_t *meteors[32];
-static int meteors_x[32];
-static int meteors_y[32];
 static struct mutex meteor_mutex;
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
@@ -154,8 +152,6 @@ static void meteor_handler(struct timer_list *data) {
             int j;
             for (j=i; j<n_meteors-1; j++) {
                 meteors[j] = meteors[j+1];
-                meteors_x[j] = meteors_x[j+1];
-                meteors_y[j] = meteors_y[j+1];
             }
             n_meteors--;
             printk(KERN_ALERT "Number of meteors after deleting %d\n", n_meteors);
@@ -336,21 +332,23 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         character->dx = character_x;
 
         // Check if there is a collision
-        // int i;
-        // int meteor_x;
-        // int meteor_y;
-        // for (i=0; i<n_meteors; i++) {
-            // meteor_x = meteors_x[i];
-            // meteor_y = meteors_y[i];
-            // int x_difference = character_x - meteor_x;
-            // if (meteor_y > meteor_size + 20) {
-                // if (x_difference > 0 && x_difference < meteor_size) {
-                    // printk(KERN_ALERT "%d %d %d %d %d\n", meteor_x, meteor_y, x_difference, meteor_size, character_x);
-                    // printk(KERN_ALERT "Collision detected\n");
-                    // return -1;
-                // }
-            // }
-        // }
+        int i;
+        int meteor_x;
+        int meteor_y;
+        mutex_lock(&meteor_mutex);
+        for (i=0; i<n_meteors; i++) {
+            meteor_x = meteors[i]->dx;
+            meteor_y = meteors[i]->dy;
+            int x_difference = character_x - meteor_x;
+            if (meteor_y > meteor_size + 20) {
+                if (x_difference > 0 && x_difference < meteor_size) {
+                    printk(KERN_ALERT "%d %d %d %d %d\n", meteor_x, meteor_y, x_difference, meteor_size, character_x);
+                    printk(KERN_ALERT "Collision detected\n");
+                    return -1;
+                }
+            }
+        }
+        mutex_unlock(&meteor_mutex);
 
         // Add a new meteor
         if (spawn_x > 0) {
@@ -382,8 +380,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                 n_meteors ++;
                 mutex_unlock(&meteor_mutex);
 
-                meteors_x[n_meteors] = spawn_x;
-                meteors_y[n_meteors] = 0;
                 printk(KERN_ALERT "Number of meteors after adding %d\n", n_meteors);
             } else {
                 printk(KERN_ALERT "reached max number of meteors, skipping this creation\n");
