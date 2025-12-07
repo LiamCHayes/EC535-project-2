@@ -170,7 +170,6 @@ static int __init meteor_init(void)
         meteors[n_meteors] = new_position;
         n_meteors ++;
     }
-    kfree(new_position);
 
     new_meteor_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
     if (!new_position) {
