@@ -26,7 +26,10 @@ static const struct modversion_info ____versions[]
 __used
 __attribute__((section("__versions"))) = {
 	{ 0xa16cf51b, "module_layout" },
+	{ 0x6bc3fbc0, "__unregister_chrdev" },
 	{ 0x97934ecf, "del_timer_sync" },
+	{ 0xe0c33a74, "__mutex_do_init" },
+	{ 0x65e3c22d, "__rt_mutex_init" },
 	{ 0x1f6e82a4, "__register_chrdev" },
 	{ 0xdb7305a1, "__stack_chk_fail" },
 	{ 0x5f754e5a, "memset" },
@@ -37,12 +40,13 @@ __attribute__((section("__versions"))) = {
 	{ 0xb44e414c, "kmalloc_caches" },
 	{ 0xc6f46339, "init_timer_key" },
 	{ 0x37a0cba, "kfree" },
-	{ 0xd09cfa79, "_mutex_unlock" },
 	{ 0x336aa937, "sys_fillrect" },
 	{ 0x6fb021c9, "lock_fb_info" },
+	{ 0x7c32d0f0, "printk" },
 	{ 0xc38c83b8, "mod_timer" },
 	{ 0x526c3a6c, "jiffies" },
-	{ 0x7c32d0f0, "printk" },
+	{ 0xd09cfa79, "_mutex_unlock" },
+	{ 0xdd18bb88, "_mutex_lock" },
 	{ 0x2e5810c6, "__aeabi_unwind_cpp_pr1" },
 	{ 0xb1ad28e0, "__gnu_mcount_nc" },
 };
