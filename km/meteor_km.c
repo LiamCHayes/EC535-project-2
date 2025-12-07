@@ -199,7 +199,7 @@ static void __exit meteor_exit(void) {
         atomic_dec(&info->count);
     }
 
-    unregister_chrdev(61, "meteor_dash")
+    unregister_chrdev(61, "meteor_dash");
 
     printk(KERN_INFO "Module exiting\n");
 }
