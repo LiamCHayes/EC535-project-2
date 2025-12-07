@@ -48,11 +48,11 @@ typedef struct meteor_position {
 } meteor_position_t;
 
 static struct timer_list * timer;
-static int meteor_update_rate_ms = 10;
+static int meteor_update_rate_ms = 10000;
 static meteor_position_t *meteors[32];
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
-static int meteor_falling_rate = 1000000;
+static int meteor_falling_rate = 2;
 
 // Helper functions
 /* Helper function borrowed from drivers/video/fbdev/core/fbmem.c */
@@ -99,6 +99,7 @@ static void meteor_handler(struct timer_list *data) {
     // Move all meteors down a few pixels
     int i;
     for (i=0; i<n_meteors; i++) {
+        printk(KERN_ALERT "Redrawing meteor %d\n", i);
         // Redraw meteor
         new_meteor_position->dx = meteors[i]->dx;
         new_meteor_position->dy = meteors[i]->dy + meteor_falling_rate;
@@ -118,8 +119,6 @@ static void meteor_handler(struct timer_list *data) {
 // Device file functions
 static int __init meteor_init(void)
 {
-    printk(KERN_ALERT "beginning of init\n");
-
     // Make memory for drawing rectangles
     blank = kmalloc(sizeof(struct fb_fillrect), GFP_KERNEL);
     if (!blank) {
