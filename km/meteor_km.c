@@ -410,6 +410,21 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         // Add a new meteor
         if (spawn_x > 0) {
             if (n_meteors < 32) {
+                // Check if a meteor is colliding with another meteor
+                mutex_lock(&meteor_mutex);
+                for (i=0; i<n_meteors; i++) {
+                    meteor_x = meteors[i]->dx;
+                    meteor_y = meteors[i]->dy;
+                    int x_difference = spawn_x - meteor_x;
+                    if (meteor_y < meteor_size) {
+                        if (x_difference > -meteor_size && x_difference < meteor_size) {
+                            printk(KERN_ALERT "Meteor spawned at x=%d is in collision with another meteor", spawn_x);
+                            return count;
+                        }
+                    }
+                }
+                mutex_unlock(&meteor_mutex);
+
                 printk(KERN_ALERT "drawing new meteor at %d\n", spawn_x);
                 printk(KERN_ALERT "Number of meteors before adding %d\n", n_meteors);
                 meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
