@@ -20,6 +20,10 @@ MODULE_DESCRIPTION("Meteor game");
 #define CYG_FB_DEFAULT_PALETTE_WHITE        0x0F
 #define CYG_FB_DEFAULT_PALETTE_LIGHTBLUE    0x09
 #define CYG_FB_DEFAULT_PALETTE_BLACK        0x00
+#define CYG_FB_DEFAULT_PALETTE_GREEN        0x02
+#define CYG_FB_DEFAULT_PALETTE_PINK         0x0D
+#define CYG_FB_DEFAULT_PALETTE_YELLOW       0x0E
+#define CYG_FB_DEFAULT_PALETTE_LIGHTGREEN   0x0A
 
 // Device file definitions
 static int meteor_open(struct inode *inode, struct file *filp);
@@ -50,6 +54,7 @@ typedef struct meteor_position {
     int height;
 } meteor_position_t;
 
+// Meteor updates
 static struct timer_list * timer;
 static int meteor_update_rate_ms = 100;
 static meteor_position_t *meteors[32];
@@ -59,6 +64,20 @@ static int n_meteors = 0;
 static int meteor_falling_rate = 4;
 static int meteor_size = 75;
 
+// Handle meteor color changes
+static int meteor_colors[7] = {
+    CYG_FB_DEFAULT_PALETTE_BLUE,
+    CYG_FB_DEFAULT_PALETTE_WHITE,
+    CYG_FB_DEFAULT_PALETTE_RED,
+    CYG_FB_DEFAULT_PALETTE_GREEN,
+    CYG_FB_DEFAULT_PALETTE_PINK,
+    CYG_FB_DEFAULT_PALETTE_YELLOW,
+    CYG_FB_DEFAULT_PALETTE_LIGHTGREEN};
+static int n_meteor_colors = 7;
+static int meteor_color_idx = 0;
+static int meteor_color = meteor_colors[0];
+
+// Temporary varibles for updating meteor and character positions
 static meteor_position_t * character;
 static meteor_position_t * new_character_position;
 
@@ -331,6 +350,13 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
 
     if (character_x < 0) {
         meteor_falling_rate = spawn_x;
+
+        // Update meteor color
+        meteor_color_idx++;
+        if (meteor_color_idx >= n_meteor_colors) {
+            meteor_color_idx = 0;
+        }
+        meteor_color = meteor_colors[meteor_color_idx];
     } else {
         // Redraw the character
         new_character_position->dx = character_x;
