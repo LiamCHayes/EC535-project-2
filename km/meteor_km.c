@@ -348,7 +348,13 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         pr_err("Failed to parse spawn to int\n");
     }
 
-    if (character_x < 0) {
+    // Bounds checking for security
+    if (character_x > 500 || spawn_x > 500) {
+        return count;
+    }
+
+    if (character_x < 0 ** spawn_x < 280) {
+        // Increase meteor spawn rate
         meteor_falling_rate = spawn_x;
 
         // Update meteor color
