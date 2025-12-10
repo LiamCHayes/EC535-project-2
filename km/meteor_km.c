@@ -56,7 +56,7 @@ typedef struct meteor_position {
 
 // Meteor updates
 static struct timer_list * timer;
-static int meteor_update_rate_ms = 1000;
+static int meteor_update_rate_ms = 100;
 static meteor_position_t *meteors[32];
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
@@ -374,7 +374,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
             meteor_x = meteors[i]->dx;
             meteor_y = meteors[i]->dy;
             int x_difference = character_x - meteor_x;
-            if (meteor_y > 280 - (meteor_size + 30)) {
+            if (meteor_y > 280 - (meteor_size + 31)) {
                 if (x_difference > -20 && x_difference < meteor_size) {
                     printk(KERN_ALERT "Collision detected\n");
 
