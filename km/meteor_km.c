@@ -75,6 +75,7 @@ static int meteor_colors[7] = {
     CYG_FB_DEFAULT_PALETTE_LIGHTGREEN};
 static int n_meteor_colors = 7;
 static int meteor_color_idx = 0;
+static int meteor_color;
 
 // Temporary varibles for updating meteor and character positions
 static meteor_position_t * character;
@@ -137,7 +138,7 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
     blank->dy = new_position->dy;
     blank->width = new_position->width;
     blank->height = new_position->height;
-    blank->color = CYG_FB_DEFAULT_PALETTE_RED;
+    blank->color = meteor_color;
     blank->rop = ROP_COPY;
     lock_fb_info(info);
     sys_fillrect(info, blank);
@@ -446,7 +447,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                 blank->dy = new_position->dy;
                 blank->width = new_position->width;
                 blank->height = new_position->height;
-                blank->color = CYG_FB_DEFAULT_PALETTE_RED;
+                blank->color = meteor_color;
                 blank->rop = ROP_COPY;
                 lock_fb_info(info);
                 sys_fillrect(info, blank);
