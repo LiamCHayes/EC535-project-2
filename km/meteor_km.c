@@ -10,6 +10,7 @@
 #include <linux/string.h> // for string manipulation functions
 #include <linux/ctype.h> // for isdigit
 #include <linux/font.h> // for default font
+#include <linux/mutex.h>
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Meteor game");
@@ -55,12 +56,13 @@ typedef struct meteor_position {
 
 // Meteor updates
 static struct timer_list * timer;
-static int meteor_update_rate_ms = 50;
+static int meteor_update_rate_ms = 100;
 static meteor_position_t *meteors[32];
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
 static int meteor_falling_rate = 4;
 static int meteor_size = 75;
+static struct mutex meteor_mutex;
 
 // Handle meteor color changes
 static int meteor_colors[7] = {
@@ -139,7 +141,7 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
 static void meteor_handler(struct timer_list *data) {
 
     // Move all meteors down a few pixels
-    lock_fb_info(info);
+    mutex_lock(&meteor_mutex);
     int i;
     for (i=0; i<n_meteors; ) {
         // Redraw meteor
@@ -167,7 +169,7 @@ static void meteor_handler(struct timer_list *data) {
             i++;
         }
     }
-    unlock_fb_info(info);
+    mutex_unlock(&meteor_mutex);
 
     // Restart timer
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
@@ -219,6 +221,9 @@ static int __init meteor_init(void)
         kfree(new_meteor_position);
         return -ENOMEM;
     }
+
+    // Meteor array mutex
+    mutex_init(&meteor_mutex);
 
     // Initialize framebuffer info
     info = get_fb_info(0);
@@ -341,7 +346,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         return count;
     }
 
-    lock_fb_info(info);
+    mutex_lock(&meteor_mutex);
     if (character_x < 0 && spawn_x < 280) {
         // Increase meteor spawn rate
         meteor_falling_rate = spawn_x;
@@ -377,7 +382,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
                     if (!new_position) {
                         pr_err("Failed to allocate new meteor pointer");
-                        unlock_fb_info(info);
+                        mutex_unlock(&meteor_mutex);
                         return -ENOMEM;
                     }
                     new_position->dx = 0;
@@ -393,7 +398,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     blank->rop = ROP_COPY;
                     sys_fillrect(info, blank);
 
-                    unlock_fb_info(info);
+                    mutex_unlock(&meteor_mutex);
                     return -2;
                 }
             }
@@ -410,7 +415,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     if (meteor_y < meteor_size) {
                         if (x_difference > -meteor_size && x_difference < meteor_size) {
                             printk(KERN_ALERT "Meteor spawned at x=%d is in collision with another meteor", spawn_x);
-                            unlock_fb_info(info);
+                            mutex_unlock(&meteor_mutex);
                             return count;
                         }
                     }
@@ -421,7 +426,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                 meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
                 if (!new_position) {
                     pr_err("Failed to allocate new meteor pointer");
-                    unlock_fb_info(info);
+                    mutex_unlock(&meteor_mutex);
                     return -ENOMEM;
                 }
                 new_position->dx = spawn_x;
@@ -447,7 +452,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         }
     }
 
-    unlock_fb_info(info);
+    mutex_unlock(&meteor_mutex);
     return count;
 }
 
