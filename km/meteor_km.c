@@ -298,6 +298,7 @@ static int meteor_release(struct inode *inode, struct file *filp) {
         }
     }
     n_meteors = 0;
+    meteor_color_idx = 0;
 }
 
 
@@ -376,7 +377,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
                     if (!new_position) {
                         pr_err("Failed to allocate new meteor pointer");
-                        meteor_color = 0;
                         unlock_fb_info(info);
                         return -ENOMEM;
                     }
@@ -393,7 +393,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     blank->rop = ROP_COPY;
                     sys_fillrect(info, blank);
 
-                    meteor_color = 0;
                     unlock_fb_info(info);
                     return -2;
                 }
@@ -411,7 +410,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     if (meteor_y < meteor_size) {
                         if (x_difference > -meteor_size && x_difference < meteor_size) {
                             printk(KERN_ALERT "Meteor spawned at x=%d is in collision with another meteor", spawn_x);
-                            meteor_color = 0;
                             unlock_fb_info(info);
                             return count;
                         }
@@ -423,7 +421,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                 meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
                 if (!new_position) {
                     pr_err("Failed to allocate new meteor pointer");
-                    meteor_color = 0;
                     unlock_fb_info(info);
                     return -ENOMEM;
                 }
