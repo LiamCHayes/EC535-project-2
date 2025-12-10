@@ -245,7 +245,7 @@ static void draw_char(struct fb_info *info, int letter_index,
     }
 }
 
-void draw_game_over(struct fb_info *info, int start_x, int start_y,
+void draw_game(struct fb_info *info, int start_x, int start_y,
                     int pixel_size, u32 color)
 {
     int x = start_x;
@@ -254,6 +254,12 @@ void draw_game_over(struct fb_info *info, int start_x, int start_y,
     draw_char(info, A, x, start_y, pixel_size, color); x += 6 * pixel_size;
     draw_char(info, M, x, start_y, pixel_size, color); x += 6 * pixel_size;
     draw_char(info, E, x, start_y, pixel_size, color); x += 8 * pixel_size; // gap
+}
+
+void draw_over(struct fb_info *info, int start_x, int start_y,
+                    int pixel_size, u32 color)
+{
+    int x = start_x;
 
     draw_char(info, O, x, start_y, pixel_size, color); x += 6 * pixel_size;
     draw_char(info, V, x, start_y, pixel_size, color); x += 6 * pixel_size;
@@ -522,7 +528,8 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     blank->rop = ROP_COPY;
                     sys_fillrect(info, blank);
 
-                    draw_game_over(info, 0, 50, 10, CYG_FB_DEFAULT_PALETTE_WHITE);
+                    draw_game(info, 100, 25, 10, CYG_FB_DEFAULT_PALETTE_WHITE);
+                    draw_over(info, 100, 120, 10, CYG_FB_DEFAULT_PALETTE_WHITE);
                     mutex_unlock(&meteor_mutex);
                     return -2;
                 }
