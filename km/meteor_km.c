@@ -75,7 +75,6 @@ static int meteor_colors[7] = {
     CYG_FB_DEFAULT_PALETTE_LIGHTGREEN};
 static int n_meteor_colors = 7;
 static int meteor_color_idx = 0;
-static int meteor_color = meteor_colors[0];
 
 // Temporary varibles for updating meteor and character positions
 static meteor_position_t * character;
@@ -353,7 +352,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         return count;
     }
 
-    if (character_x < 0 ** spawn_x < 280) {
+    if (character_x < 0 && spawn_x < 280) {
         // Increase meteor spawn rate
         meteor_falling_rate = spawn_x;
 
