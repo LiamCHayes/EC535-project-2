@@ -2,7 +2,6 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/fb.h>
-#include <linux/mutex.h>
 
 #include <linux/uaccess.h> // copy_from/to_user
 #include <asm/uaccess.h> // ^same
@@ -58,7 +57,6 @@ typedef struct meteor_position {
 static struct timer_list * timer;
 static int meteor_update_rate_ms = 100;
 static meteor_position_t *meteors[32];
-static struct mutex meteor_mutex;
 static meteor_position_t * new_meteor_position;
 static int n_meteors = 0;
 static int meteor_falling_rate = 4;
@@ -105,9 +103,7 @@ static int redraw_character(meteor_position_t *old_position, meteor_position_t *
     blank->height = old_position->height;
     blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
     blank->rop = ROP_COPY;
-    lock_fb_info(info);
     sys_fillrect(info, blank);
-    unlock_fb_info(info);
 
     // Draw rectangle at new position in red
     blank->dx = new_position->dx;
@@ -116,9 +112,7 @@ static int redraw_character(meteor_position_t *old_position, meteor_position_t *
     blank->height = new_position->height;
     blank->color = CYG_FB_DEFAULT_PALETTE_LIGHTBLUE;
     blank->rop = ROP_COPY;
-    lock_fb_info(info);
     sys_fillrect(info, blank);
-    unlock_fb_info(info);
 }
 
 static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new_position) {
@@ -129,9 +123,7 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
     blank->height = old_position->height;
     blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
     blank->rop = ROP_COPY;
-    lock_fb_info(info);
     sys_fillrect(info, blank);
-    unlock_fb_info(info);
 
     // Draw rectangle at new position in red
     blank->dx = new_position->dx;
@@ -140,17 +132,15 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
     blank->height = new_position->height;
     blank->color = meteor_color;
     blank->rop = ROP_COPY;
-    lock_fb_info(info);
     sys_fillrect(info, blank);
-    unlock_fb_info(info);
 }
 
 // meteor timer handler
 static void meteor_handler(struct timer_list *data) {
 
     // Move all meteors down a few pixels
+    lock_fb_info(info);
     int i;
-    mutex_lock(&meteor_mutex);
     for (i=0; i<n_meteors; ) {
         // Redraw meteor
         new_meteor_position->dx = meteors[i]->dx;
@@ -177,7 +167,7 @@ static void meteor_handler(struct timer_list *data) {
             i++;
         }
     }
-    mutex_unlock(&meteor_mutex);
+    unlock_fb_info(info);
 
     // Restart timer
     mod_timer(timer, jiffies + msecs_to_jiffies(meteor_update_rate_ms));
@@ -229,9 +219,6 @@ static int __init meteor_init(void)
         kfree(new_meteor_position);
         return -ENOMEM;
     }
-
-    // Meteor array mutex
-    mutex_init(&meteor_mutex);
 
     // Initialize framebuffer info
     info = get_fb_info(0);
@@ -353,6 +340,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         return count;
     }
 
+    lock_fb_info(info);
     if (character_x < 0 && spawn_x < 280) {
         // Increase meteor spawn rate
         meteor_falling_rate = spawn_x;
@@ -376,7 +364,6 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         int i;
         int meteor_x;
         int meteor_y;
-        mutex_lock(&meteor_mutex);
         for (i=0; i<n_meteors; i++) {
             meteor_x = meteors[i]->dx;
             meteor_y = meteors[i]->dy;
@@ -389,6 +376,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
                     if (!new_position) {
                         pr_err("Failed to allocate new meteor pointer");
+                        unlock_fb_info(info);
                         return -ENOMEM;
                     }
                     new_position->dx = 0;
@@ -402,40 +390,37 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     blank->height = new_position->height;
                     blank->color = CYG_FB_DEFAULT_PALETTE_BLACK;
                     blank->rop = ROP_COPY;
-                    lock_fb_info(info);
                     sys_fillrect(info, blank);
-                    unlock_fb_info(info);
 
-                    mutex_unlock(&meteor_mutex);
+                    unlock_fb_info(info);
                     return -2;
                 }
             }
         }
-        mutex_unlock(&meteor_mutex);
 
         // Add a new meteor
         if (spawn_x > 0) {
             if (n_meteors < 32) {
-                // // Check if a meteor is colliding with another meteor
-                // mutex_lock(&meteor_mutex);
-                // for (i=0; i<n_meteors; i++) {
-                    // meteor_x = meteors[i]->dx;
-                    // meteor_y = meteors[i]->dy;
-                    // int x_difference = spawn_x - meteor_x;
-                    // if (meteor_y < meteor_size) {
-                        // if (x_difference > -meteor_size && x_difference < meteor_size) {
-                            // printk(KERN_ALERT "Meteor spawned at x=%d is in collision with another meteor", spawn_x);
-                            // return count;
-                        // }
-                    // }
-                // }
-                // mutex_unlock(&meteor_mutex);
+                // Check if a meteor is colliding with another meteor
+                for (i=0; i<n_meteors; i++) {
+                    meteor_x = meteors[i]->dx;
+                    meteor_y = meteors[i]->dy;
+                    int x_difference = spawn_x - meteor_x;
+                    if (meteor_y < meteor_size) {
+                        if (x_difference > -meteor_size && x_difference < meteor_size) {
+                            printk(KERN_ALERT "Meteor spawned at x=%d is in collision with another meteor", spawn_x);
+                            unlock_fb_info(info);
+                            return count;
+                        }
+                    }
+                }
 
                 printk(KERN_ALERT "drawing new meteor at %d\n", spawn_x);
                 printk(KERN_ALERT "Number of meteors before adding %d\n", n_meteors);
                 meteor_position_t *new_position = kmalloc(sizeof(meteor_position_t), GFP_KERNEL);
                 if (!new_position) {
                     pr_err("Failed to allocate new meteor pointer");
+                    unlock_fb_info(info);
                     return -ENOMEM;
                 }
                 new_position->dx = spawn_x;
@@ -449,14 +434,10 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                 blank->height = new_position->height;
                 blank->color = meteor_color;
                 blank->rop = ROP_COPY;
-                lock_fb_info(info);
                 sys_fillrect(info, blank);
-                unlock_fb_info(info);
 
-                mutex_lock(&meteor_mutex);
                 meteors[n_meteors] = new_position;
                 n_meteors ++;
-                mutex_unlock(&meteor_mutex);
 
                 printk(KERN_ALERT "Number of meteors after adding %d\n", n_meteors);
             } else {
@@ -465,6 +446,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
         }
     }
 
+    unlock_fb_info(info);
     return count;
 }
 
