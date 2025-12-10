@@ -227,10 +227,12 @@ static void draw_rect(struct fb_info *info, int x, int y, int w, int h, u32 colo
 static void draw_char(struct fb_info *info, int letter_index,
                       int x, int y, int pixel_size, u32 color)
 {
-    for (int row = 0; row < 7; row++) {
+    int row;
+    int col;
+    for (row = 0; row < 7; row++) {
         uint8_t line = font_5x7[letter_index][row];
 
-        for (int col = 0; col < 5; col++) {
+        for (col = 0; col < 5; col++) {
             if (line & (1 << (4 - col))) {
                 draw_rect(info,
                           x + col * pixel_size,
