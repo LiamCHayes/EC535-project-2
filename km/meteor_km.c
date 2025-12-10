@@ -522,7 +522,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     blank->rop = ROP_COPY;
                     sys_fillrect(info, blank);
 
-                    draw_game_over(info, 100, 50, 10, CYG_FB_DEFAULT_PALETTE_WHITE);
+                    draw_game_over(info, 0, 50, 10, CYG_FB_DEFAULT_PALETTE_WHITE);
                     mutex_unlock(&meteor_mutex);
                     return -2;
                 }
