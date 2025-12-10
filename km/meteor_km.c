@@ -81,6 +81,81 @@ static int meteor_color;
 static meteor_position_t * character;
 static meteor_position_t * new_character_position;
 
+// Game over global variables
+static const uint8_t font_5x7[][7] = {
+    // G
+    {
+        0b01110,
+        0b10001,
+        0b10000,
+        0b10111,
+        0b10001,
+        0b10001,
+        0b01110
+    },
+    // A
+    {
+        0b01110,
+        0b10001,
+        0b10001,
+        0b11111,
+        0b10001,
+        0b10001,
+        0b10001
+    },
+    // M
+    {
+        0b10001,
+        0b11011,
+        0b10101,
+        0b10101,
+        0b10001,
+        0b10001,
+        0b10001
+    },
+    // E
+    {
+        0b11111,
+        0b10000,
+        0b10000,
+        0b11110,
+        0b10000,
+        0b10000,
+        0b11111
+    },
+    // O
+    {
+        0b01110,
+        0b10001,
+        0b10001,
+        0b10001,
+        0b10001,
+        0b10001,
+        0b01110
+    },
+    // V
+    {
+        0b10001,
+        0b10001,
+        0b10001,
+        0b10001,
+        0b10001,
+        0b01010,
+        0b00100
+    },
+    // R
+    {
+        0b11110,
+        0b10001,
+        0b10001,
+        0b11110,
+        0b10100,
+        0b10010,
+        0b10001
+    },
+};
+static enum { G, A, M, E, O, V, R };
+
 // Helper functions
 /* Helper function borrowed from drivers/video/fbdev/core/fbmem.c */
 static struct fb_info *get_fb_info(unsigned int idx)
@@ -135,6 +210,53 @@ static int redraw_meteor(meteor_position_t *old_position, meteor_position_t *new
     blank->color = meteor_color;
     blank->rop = ROP_COPY;
     sys_fillrect(info, blank);
+}
+
+static void draw_rect(struct fb_info *info, int x, int y, int w, int h, u32 color) {
+    struct fb_fillrect rect = {
+        .dx = x,
+        .dy = y,
+        .width = w,
+        .height = h,
+        .color = color,
+        .rop = ROP_COPY,
+    };
+    sys_fillrect(info, &rect);
+}
+
+static void draw_char(struct fb_info *info, int letter_index,
+                      int x, int y, int pixel_size, u32 color)
+{
+    for (int row = 0; row < 7; row++) {
+        uint8_t line = font_5x7[letter_index][row];
+
+        for (int col = 0; col < 5; col++) {
+            if (line & (1 << (4 - col))) {
+                draw_rect(info,
+                          x + col * pixel_size,
+                          y + row * pixel_size,
+                          pixel_size,
+                          pixel_size,
+                          color);
+            }
+        }
+    }
+}
+
+void draw_game_over(struct fb_info *info, int start_x, int start_y,
+                    int pixel_size, u32 color)
+{
+    int x = start_x;
+
+    draw_char(info, G, x, start_y, pixel_size, color); x += 6 * pixel_size;
+    draw_char(info, A, x, start_y, pixel_size, color); x += 6 * pixel_size;
+    draw_char(info, M, x, start_y, pixel_size, color); x += 6 * pixel_size;
+    draw_char(info, E, x, start_y, pixel_size, color); x += 8 * pixel_size; // gap
+
+    draw_char(info, O, x, start_y, pixel_size, color); x += 6 * pixel_size;
+    draw_char(info, V, x, start_y, pixel_size, color); x += 6 * pixel_size;
+    draw_char(info, E, x, start_y, pixel_size, color); x += 6 * pixel_size;
+    draw_char(info, R, x, start_y, pixel_size, color);
 }
 
 // meteor timer handler
@@ -398,6 +520,7 @@ static ssize_t meteor_write(struct file *filp, const char *buf, size_t count, lo
                     blank->rop = ROP_COPY;
                     sys_fillrect(info, blank);
 
+                    draw_game_over(info, 100, 50, 10, CYG_FB_DEFAULT_PALETTE_WHITE);
                     mutex_unlock(&meteor_mutex);
                     return -2;
                 }
